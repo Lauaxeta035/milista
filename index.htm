@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mi Lista">
+<meta name="theme-color" content="#0f1115">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADlklEQVR42u3dsW7UUBBA0bHlX6SK/4BQkFSU0NCABMQfAJI7PnIp0gTBs7wb+8nzfNzdJCJgrpzriWe3u7y9i5dHFxA+H71zAUvYOxewhL1zAUvYOxewhL1zAQUpFKRQkEJBCgUpFKRQkEJBCgUpFKTOBRSkUJBCQQoFKRSkUJBCQQoFKRSkUJBCKEihIIWCFApSKEihIIWCFApSKEihIIVQkEJBCq/HId8/4OMceY8vYyJRusvDXRozUmvxryKHP+3d5THD65B+akWLl8fXUZAyo3A8zoKUGYt+mJAyo3g8zCakr8bmDxPSM96brLl4CFLXjFyXkN6k6xDH+1mQumZkyo6eGczIFqRBFEFKFEHKjIw/XAQpMwQpMwQpUTbEoZEgvf/7CatpZsbrcWjQjOePrPTj94cd/5vffBakBzNj+ePVzLjhzxekNcxY89m9zbj2uwjSemYsf00dM27+Xiak7lxMSJkhSJlhQsoME9IMZqyZZJS+5oYJxPmmHcmDdNmP5c/W8SPzHCx/kJYMWHNd2duP5BPSoYUgnebbf7dS8+dLtuwYGgnSaRakgtSdiyBlhiBlhgkpM0xImSFImSFIiSJImcEMQcoMQcqMzXBoxIyW9lYsNW0pSkt7K4J0XzMi7d6KIK1hRiTcWxGk9cxIt7diQupWxYSUKCakzDAhZYYJaSvPnUfOvRVBuv1z59Hc3oog3UyUxvZWvOzT9nuRbeytWGraJUinWZAKUrcqgjSIIkiJYkLKDBNSZghSZghSZghSQcoMQcoMQcqM8LJP0djeiqWmGmZk31sRpJuJ0tjeiiDd3YzIubciSCuZkfH9VkxI3aqYkDLDhJQoJqTMMCFt4rnzSPt+K4K03vvx5NpbEaT1njvPu7fiZZ823otsZm/FUlPtvUhB6lf2zBCkzBCkRAkTUqKYkDJDkDJDkDJDkDJDkMoOZghSZghSZghSZghSoghSoghSZghSZgjSvfDbeC4tfo6C1CUkza3KsYP0+2kuHr9GQeqaIUg3xB/juS4bgvQ6bNuPA5uRJEhb9ePYZkSOpaYu4mmMiHg3K1BLTQV8GqOLuJ/NM8I7Nf0fpzHf3zkn9s4FTD4hhWFCCsOEFGbA3rmAghQKUihIoSCFghQKUihIoSCFghQKUucCClIoSKEghYIUClIoSKEghYIUClIoSCEUpFCQQkEKBSkUpFCQQkEKBSkUpFCQQihIYRH/AFPcp7BpG4GjAAAAAElFTkSuQmCC">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADlklEQVR42u3dsW7UUBBA0bHlX6SK/4BQkFSU0NCABMQfAJI7PnIp0gTBs7wb+8nzfNzdJCJgrpzriWe3u7y9i5dHFxA+H71zAUvYOxewhL1zAUvYOxewhL1zAQUpFKRQkEJBCgUpFKRQkEJBCgUpFKTOBRSkUJBCQQoFKRSkUJBCQQoFKRSkUJBCKEihIIWCFApSKEihIIWCFApSKEihIIVQkEJBCq/HId8/4OMceY8vYyJRusvDXRozUmvxryKHP+3d5THD65B+akWLl8fXUZAyo3A8zoKUGYt+mJAyo3g8zCakr8bmDxPSM96brLl4CFLXjFyXkN6k6xDH+1mQumZkyo6eGczIFqRBFEFKFEHKjIw/XAQpMwQpMwQpUTbEoZEgvf/7CatpZsbrcWjQjOePrPTj94cd/5vffBakBzNj+ePVzLjhzxekNcxY89m9zbj2uwjSemYsf00dM27+Xiak7lxMSJkhSJlhQsoME9IMZqyZZJS+5oYJxPmmHcmDdNmP5c/W8SPzHCx/kJYMWHNd2duP5BPSoYUgnebbf7dS8+dLtuwYGgnSaRakgtSdiyBlhiBlhgkpM0xImSFImSFIiSJImcEMQcoMQcqMzXBoxIyW9lYsNW0pSkt7K4J0XzMi7d6KIK1hRiTcWxGk9cxIt7diQupWxYSUKCakzDAhZYYJaSvPnUfOvRVBuv1z59Hc3oog3UyUxvZWvOzT9nuRbeytWGraJUinWZAKUrcqgjSIIkiJYkLKDBNSZghSZghSZghSQcoMQcoMQcqM8LJP0djeiqWmGmZk31sRpJuJ0tjeiiDd3YzIubciSCuZkfH9VkxI3aqYkDLDhJQoJqTMMCFt4rnzSPt+K4K03vvx5NpbEaT1njvPu7fiZZ823otsZm/FUlPtvUhB6lf2zBCkzBCkRAkTUqKYkDJDkDJDkDJDkDJDkMoOZghSZghSZghSZghSoghSoghSZghSZgjSvfDbeC4tfo6C1CUkza3KsYP0+2kuHr9GQeqaIUg3xB/juS4bgvQ6bNuPA5uRJEhb9ePYZkSOpaYu4mmMiHg3K1BLTQV8GqOLuJ/NM8I7Nf0fpzHf3zkn9s4FTD4hhWFCCsOEFGbA3rmAghQKUihIoSCFghQKUihIoSCFghQKUucCClIoSKEghYIUClIoSKEghYIUClIoSCEUpFCQQkEKBSkUpFCQQkEKBSkUpFCQQihIYRH/AFPcp7BpG4GjAAAAAElFTkSuQmCC">
+<title>Mi Lista</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1115;--card:#181b22;--card2:#20242d;--line:#2a2f3a;--txt:#eef0f4;--mut:#8b93a3;
+  --acc:#ff6b5b;--acc2:#ffb35b;
+  --manga:#ff6b8b;--anime:#a78bfa;--drama:#f472b6;--serie:#38bdf8;--libro:#fbbf24;--peli:#34d399;
+  --tabh:62px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,-apple-system,system-ui,sans-serif;-webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(env(safe-area-inset-bottom) + var(--tabh) + 90px) env(safe-area-inset-left);min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+a{color:var(--acc2)}
+img{display:block}
+.wrap{max-width:680px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+header h1{font-size:28px;font-weight:800;margin:6px 0 2px;letter-spacing:-.02em}
+header p{margin:0;color:var(--mut);font-size:14px}
+.iconbtn{width:42px;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:19px;flex:none;margin-top:6px}
+.view{display:none}.view.on{display:block}
+.banner{background:linear-gradient(135deg,rgba(255,107,91,.16),rgba(255,179,91,.12));border:1px solid rgba(255,140,91,.35);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.45;margin-top:14px}
+.banner button{color:var(--acc2);font-weight:700;text-decoration:underline}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;min-width:0}
+.stat b{display:block;font-size:22px;font-weight:800}
+.stat span{font-size:12px;color:var(--mut)}
+.search{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0 12px;margin-bottom:12px}
+.search input{flex:1;background:none;border:0;outline:0;padding:12px 0;font-size:16px;min-width:0}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:600;color:var(--mut);white-space:nowrap}
+.chip.on{background:var(--txt);color:var(--bg);border-color:var(--txt)}
+.chip.small{padding:6px 12px;font-size:13px}
+.list{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.item{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;align-items:center;cursor:pointer}
+.cover{flex:none;width:54px;height:80px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#0f1115;overflow:hidden;background:var(--card2)}
+.cover img{width:100%;height:100%;object-fit:cover}
+.info{flex:1;min-width:0}
+.info h3{margin:0 0 4px;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{font-size:12px;color:var(--mut);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.badge{padding:2px 8px;border-radius:999px;font-weight:600;font-size:11px;background:var(--card2)}
+.badge.date{color:var(--acc2)}
+.myr{color:var(--acc2);font-weight:700}
+.bar{height:5px;border-radius:5px;background:var(--card2);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:5px}
+.prog{font-size:12px;color:var(--mut);margin-top:4px}
+.plus{flex:none;width:44px;height:44px;border-radius:12px;background:var(--card2);font-size:15px;font-weight:800}
+.plus:active{transform:scale(.94)}
+.empty{text-align:center;color:var(--mut);padding:44px 20px;line-height:1.5}
+.empty div{font-size:42px;margin-bottom:8px}
+.fab{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(var(--tabh) + 16px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:20px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;font-size:24px;box-shadow:0 10px 30px rgba(255,107,91,.4);z-index:5}
+.tabbar{position:fixed;left:0;right:0;bottom:0;background:rgba(15,17,21,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom);z-index:6}
+.tabbar button{flex:1;max-width:170px;height:var(--tabh);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--mut)}
+.tabbar button span{font-size:21px;filter:grayscale(1);opacity:.55}
+.tabbar button.on{color:var(--txt)}
+.tabbar button.on span{filter:none;opacity:1}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;z-index:10;align-items:flex-end;justify-content:center}
+.sheet{background:var(--card);width:100%;max-width:680px;border-radius:22px 22px 0 0;padding:0 18px calc(24px + env(safe-area-inset-bottom));height:calc(100% - env(safe-area-inset-top) - 18px);overflow-y:auto;-webkit-overflow-scrolling:touch;animation:up .22s ease;overscroll-behavior:contain}
+@keyframes up{from{transform:translateY(40px);opacity:.5}to{transform:none;opacity:1}}
+.sh-top{position:sticky;top:0;background:var(--card);display:flex;justify-content:space-between;align-items:center;padding:14px 0 10px;z-index:2;gap:10px}
+.sh-top h2{margin:0;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.x{width:36px;height:36px;border-radius:50%;background:var(--card2);font-size:16px;color:var(--mut);flex:none}
+label,.lbl{display:block;font-size:13px;color:var(--mut);margin:16px 0 7px;font-weight:600}
+.field{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:16px;outline:0;min-height:46px}
+.field:focus{border-color:var(--acc)}
+textarea.field{min-height:70px;resize:vertical}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.btn{padding:13px 14px;border-radius:14px;font-weight:700;font-size:15px;text-align:center}
+.btn.pri{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff}
+.btn.sec{background:var(--card2)}
+.btn.del{background:rgba(255,80,80,.12);color:#ff7a7a}
+.btnrow{display:flex;gap:8px}.btnrow>*{flex:1}
+.toast{position:fixed;left:50%;bottom:calc(var(--tabh) + 90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--txt);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:50;white-space:nowrap}
+.toast.show{opacity:1}
+.sort{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
+.sort select{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px}
+.count{font-size:13px;color:var(--mut)}
+h2.sec{font-size:13px;font-weight:700;margin:22px 0 10px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.hbar{display:grid;grid-template-columns:108px 1fr 34px;align-items:center;gap:10px;margin:8px 0;font-size:14px}
+.hbar .track{height:10px;border-radius:6px;background:var(--card2);overflow:hidden}
+.hbar .track i{display:block;height:100%;border-radius:6px}
+.hbar b{text-align:right;font-variant-numeric:tabular-nums}
+.consume{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.rank{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.rank:last-child{border-bottom:0}
+.rank .n{width:20px;color:var(--mut);font-weight:700}
+.rank .cover{width:36px;height:52px;font-size:15px;border-radius:7px}
+.rank .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.when{flex:none;text-align:center;min-width:58px;padding:6px 8px;border-radius:12px;background:var(--card2)}
+.when b{display:block;font-size:20px;font-weight:800;line-height:1.1}
+.when span{font-size:11px;color:var(--mut)}
+.when.today{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff}
+.when.today span{color:#fff}
+.hint{font-size:13px;color:var(--mut);line-height:1.5;margin:8px 0 0}
+.thinking{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:14px;padding:16px 4px}
+.spin{width:18px;height:18px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--acc);animation:sp .8s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.wide{width:100%;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-weight:700;font-size:15px;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px}
+.wide:disabled{opacity:.5}
+/* detail */
+.hero{display:flex;gap:14px;align-items:flex-start}
+.hero .cover{width:108px;height:160px;border-radius:12px;font-size:40px}
+.hero h1{font-size:21px;margin:2px 0 4px;line-height:1.2}
+.hero .orig{font-size:13px;color:var(--mut);margin-bottom:8px}
+.scores{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.score{background:var(--card2);border-radius:10px;padding:6px 10px;font-size:12px;color:var(--mut)}
+.score b{color:var(--txt);font-size:16px;margin-right:3px}
+.score.me b{color:var(--acc2)}
+.overview{font-size:14px;line-height:1.55;color:#cfd3dc;margin:16px 0 0;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+.overview.open{-webkit-line-clamp:unset}
+.genres{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.genres span{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--mut)}
+.track-box{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:4px 14px 14px;margin-top:16px}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper button{width:44px;height:44px;border-radius:12px;background:var(--card2);font-size:20px;font-weight:700;flex:none}
+.stepper input{flex:1;text-align:center;min-width:0}
+.stepper .of{color:var(--mut);font-size:14px;white-space:nowrap}
+.rate10{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.rate10 button{height:38px;border-radius:9px;background:var(--card2);font-weight:700;font-size:14px;color:var(--mut)}
+.rate10 button.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff}
+.hscroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin:0 -18px;padding-left:18px;padding-right:18px}
+.hscroll::-webkit-scrollbar{display:none}
+.person{flex:none;width:82px;text-align:center;cursor:pointer}
+.person .ph{width:72px;height:72px;border-radius:50%;margin:0 auto 6px;overflow:hidden;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--mut)}
+.person .ph img{width:100%;height:100%;object-fit:cover}
+.person b{display:block;font-size:12px;line-height:1.25}
+.person small{display:block;font-size:11px;color:var(--mut);margin-top:2px;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pcard{flex:none;width:104px;cursor:pointer;position:relative}
+.pcard .po{width:104px;height:154px;border-radius:10px;overflow:hidden;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#0f1115}
+.pcard .po img{width:100%;height:100%;object-fit:cover}
+.pcard b{display:block;font-size:12px;margin-top:6px;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pcard small{display:block;font-size:11px;color:var(--mut);margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.pcard .in{position:absolute;top:6px;right:6px;background:rgba(15,17,21,.85);border-radius:8px;padding:2px 6px;font-size:11px;font-weight:700;color:#34d399}
+.pcard .sc{position:absolute;top:6px;left:6px;background:rgba(15,17,21,.85);border-radius:8px;padding:2px 6px;font-size:11px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:14px 10px}
+.grid .pcard{width:auto}
+.grid .pcard .po{width:100%;height:auto;aspect-ratio:2/3}
+.res{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);align-items:center;cursor:pointer}
+.res .cover{width:46px;height:68px;font-size:18px}
+.res .ph{width:56px;height:56px;border-radius:50%;overflow:hidden;background:var(--card2);flex:none}
+.res .ph img{width:100%;height:100%;object-fit:cover}
+.res h4{margin:0 0 4px;font-size:15px}
+.res .addb{flex:none;width:38px;height:38px;border-radius:10px;background:var(--card2);font-weight:800;font-size:18px}
+.res .addb.done{color:#34d399}
+.sugg-why{font-size:12px;color:var(--mut);margin-top:4px;line-height:1.35}
+.pbio{font-size:14px;line-height:1.55;color:#cfd3dc;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer;margin-top:14px}
+.pbio.open{-webkit-line-clamp:unset}
+.steps{padding-left:20px;margin:8px 0;font-size:14px;line-height:1.6;color:#cfd3dc}
+.ext{display:inline-block;margin-top:16px;font-size:13px;color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1 id="hTitle">Mi Lista</h1>
+      <p id="hSub">Manga, anime, dramas, series, libros y películas</p>
+    </div>
+    <button class="iconbtn" id="setBtn" aria-label="Ajustes">⚙️</button>
+  </header>
+  <div id="keyBanner"></div>
+
+  <section class="view on" id="v-lista">
+    <div class="stats">
+      <div class="stat"><b id="sTotal">0</b><span>En la lista</span></div>
+      <div class="stat"><b id="sNow">0</b><span>En curso</span></div>
+      <div class="stat"><b id="sDone">0</b><span>Completados</span></div>
+    </div>
+    <div class="search"><span>🔍</span><input id="q" type="search" placeholder="Filtrar mi lista…" autocomplete="off"></div>
+    <div class="chips" id="typeChips"></div>
+    <div class="chips" id="countryChips"></div>
+    <div class="chips" id="statusChips"></div>
+    <div class="sort">
+      <span class="count" id="count"></span>
+      <select id="sortSel">
+        <option value="updated">Recientes</option>
+        <option value="title">A–Z</option>
+        <option value="rating">Mi nota</option>
+        <option value="score">Nota pública</option>
+        <option value="progress">Más avanzados</option>
+      </select>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+
+  <section class="view" id="v-prox"><div id="proxBody"></div></section>
+  <section class="view" id="v-parati"><div id="paratiBody"></div></section>
+  <section class="view" id="v-stats"><div id="statsBody"></div></section>
+</div>
+
+<button class="fab" id="fab" aria-label="Buscar y añadir">🔍</button>
+
+<nav class="tabbar">
+  <button class="on" data-view="lista"><span>📋</span>Lista</button>
+  <button data-view="prox"><span>📅</span>Próximos</button>
+  <button data-view="parati"><span>✨</span>Para ti</button>
+  <button data-view="stats"><span>📊</span>Estadísticas</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+
+<script>
+/* =============== Config =============== */
+const TYPES = {
+  anime:{label:'Anime',emoji:'🌸',color:'var(--anime)',unit:'Episodio',short:'ep.',plural:'episodios de anime'},
+  manga:{label:'Manga',emoji:'📖',color:'var(--manga)',unit:'Capítulo',short:'cap.',plural:'capítulos leídos'},
+  drama:{label:'Dramas',emoji:'🏮',color:'var(--drama)',unit:'Episodio',short:'ep.',plural:'episodios de dramas'},
+  serie:{label:'Series',emoji:'📺',color:'var(--serie)',unit:'Episodio',short:'ep.',plural:'episodios de series'},
+  peli:{label:'Películas',emoji:'🎬',color:'var(--peli)',unit:null,short:'',plural:'películas vistas'},
+  libro:{label:'Libros',emoji:'📚',color:'var(--libro)',unit:'Página',short:'pág.',plural:'páginas leídas'}
+};
+const STATUS = {
+  curso:{label:'Viendo / leyendo',short:'En curso',dot:'🟢',color:'#34d399'},
+  pend:{label:'Pendiente',short:'Pendiente',dot:'⏳',color:'#fbbf24'},
+  hecho:{label:'Completado',short:'Completado',dot:'✅',color:'#38bdf8'},
+  pausa:{label:'En pausa',short:'En pausa',dot:'⏸️',color:'#a78bfa'},
+  aband:{label:'Abandonado',short:'Abandonado',dot:'✖️',color:'#8b93a3'}
+};
+const ASIA = ['KR','CN','JP','TH','TW','HK','PH','VN','SG','MY','ID'];
+const COUNTRY_NAMES = {KR:'Corea',CN:'China',JP:'Japón',TH:'Tailandia',TW:'Taiwán',HK:'Hong Kong',PH:'Filipinas',US:'EE. UU.',GB:'Reino Unido',ES:'España',FR:'Francia',VN:'Vietnam'};
+const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const TMDB_IMG = 'https://image.tmdb.org/t/p/';
+const TV_SKIP_GENRES = [10767,10763,10764]; // talk, news, reality
+
+/* =============== State & storage =============== */
+const LS_ITEMS = 'milista2_items', LS_SET = 'milista2_settings';
+const lsGet = (k, d) => { try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } };
+const lsSet = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } };
+let items = lsGet(LS_ITEMS, {});
+let settings = lsGet(LS_SET, {tmdbKey:'', lastRefresh:0});
+function persist(){ if(!lsSet(LS_ITEMS, items)) toast('No se pudo guardar en el dispositivo'); }
+function saveSettings(){ lsSet(LS_SET, settings); }
+function saveItem(it){ it.updated = Date.now(); items[it.id] = it; persist(); render(); }
+function removeItem(id){ delete items[id]; persist(); render(); }
+
+let view = 'lista', fType = 'all', fCountry = 'all', fStatus = 'all', query = '', sortBy = 'updated';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* =============== Helpers =============== */
+const flag = c => c && /^[A-Z]{2}$/.test(c) ? String.fromCodePoint(...[...c].map(ch => 127397 + ch.charCodeAt(0))) : '';
+const ymd = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const todayStr = () => ymd(new Date());
+function daysUntil(s){ const [y,m,d] = s.split('-').map(Number); const t = new Date(); t.setHours(0,0,0,0); return Math.round((new Date(y,m-1,d) - t) / 86400000); }
+function relDay(n){ return n===0?'Hoy':n===1?'Mañana':n===-1?'Ayer':n>0?`en ${n} días`:`hace ${-n} días`; }
+function fmtDate(s){ const [y,m,d] = s.split('-').map(Number); return `${d} ${MONTHS[m-1]}${y!==new Date().getFullYear()?' '+y:''}`; }
+const fmtScore = s => s ? (Math.round(s*10)/10).toFixed(1) : '';
+function pct(it){ return it.total > 0 ? Math.min(100, Math.round((it.prog||0) / it.total * 100)) : (it.status==='hecho'?100:0); }
+function progText(it){
+  const T = TYPES[it.type];
+  if(!T.unit) return it.status==='hecho' ? 'Vista' : '';
+  let s = '';
+  if((it.type==='serie'||it.type==='drama') && it.season) s += `T${it.season} · `;
+  s += `${T.short} ${it.prog||0}`;
+  if(it.total) s += ` / ${it.total}`;
+  return s;
+}
+function letterBox(e){ return `<span>${esc((String(e.title||'?').trim()[0]||'?').toUpperCase())}</span>`; }
+function posterInner(e){ return e.poster ? `<img src="${esc(e.poster)}" loading="lazy" referrerpolicy="no-referrer" alt="" onerror="this.remove()">` : letterBox(e); }
+function coverHTML(e, cls=''){ return `<div class="cover ${cls}" style="background:${e.poster?'var(--card2)':TYPES[e.type]?.color||'var(--card2)'}">${posterInner(e)}</div>`; }
+function stripHtml(s){ return String(s||'').replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'').replace(/~!|!~/g,'').replace(/__|\*\*/g,'').replace(/\n{3,}/g,'\n\n').trim(); }
+async function runLimited(arr, n, fn){ const out = []; let i = 0; await Promise.all(Array.from({length:Math.min(n, arr.length)}, async () => { while(i < arr.length){ const k = i++; try{ out[k] = await fn(arr[k], k); }catch(e){ out[k] = null; } } })); return out; }
+let tt; function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 1800); }
+
+/* =============== APIs =============== */
+class NoKey extends Error {}
+async function tmdb(path, params = {}, lang = 'es-ES'){
+  const key = (settings.tmdbKey||'').trim();
+  if(!key) throw new NoKey('Falta la clave de TMDB');
+  const bearer = key.length > 60;
+  const u = new URL('https://api.themoviedb.org/3' + path);
+  if(lang) u.searchParams.set('language', lang);
+  Object.entries(params).forEach(([k,v]) => v != null && u.searchParams.set(k, v));
+  if(!bearer) u.searchParams.set('api_key', key);
+  const r = await fetch(u, bearer ? {headers:{Authorization:'Bearer '+key, accept:'application/json'}} : {});
+  if(r.status === 401) throw new Error('La clave de TMDB no es válida');
+  if(!r.ok) throw new Error('TMDB ' + r.status);
+  return r.json();
+}
+async function anilist(query, variables = {}){
+  const r = await fetch('https://graphql.anilist.co', {method:'POST', headers:{'Content-Type':'application/json', Accept:'application/json'}, body: JSON.stringify({query, variables})});
+  const j = await r.json().catch(() => ({}));
+  if(!r.ok || j.errors) throw new Error('AniList ' + (j.errors?.[0]?.message || r.status));
+  return j.data;
+}
+async function ol(path){
+  const r = await fetch('https://openlibrary.org' + path);
+  if(!r.ok) throw new Error('Open Library ' + r.status);
+  return r.json();
+}
+
+/* ---- normalizers: every title becomes an "entry" ---- */
+const AL_F = `fragment F on Media{id type format title{userPreferred romaji english native} coverImage{large} startDate{year} episodes chapters status averageScore countryOfOrigin genres nextAiringEpisode{airingAt episode}}`;
+function normAL(m){
+  const type = m.type === 'ANIME' ? 'anime' : 'manga';
+  const e = {
+    id:`al:${m.type}:${m.id}`, src:'anilist', srcId:m.id, mediaType:m.type, type,
+    title: m.title?.userPreferred || m.title?.romaji || m.title?.english || '?',
+    orig: m.title?.native || '', alt: m.title?.english && m.title.english !== m.title.userPreferred ? m.title.english : '',
+    year: m.startDate?.year || null, country: m.countryOfOrigin || '', poster: m.coverImage?.large || '',
+    score: m.averageScore ? m.averageScore/10 : null, genres: m.genres || [],
+    total: (type==='anime' ? m.episodes : m.chapters) || null, mstatus: m.status || '',
+    format: m.format || ''
+  };
+  if(m.nextAiringEpisode){ e.next = ymd(new Date(m.nextAiringEpisode.airingAt*1000)); e.nextLabel = `Ep. ${m.nextAiringEpisode.episode}`; }
+  else if(m.status === 'FINISHED'){ e.next = null; }
+  return e;
+}
+function classifyTV(t){
+  const gs = t.genre_ids || (t.genres||[]).map(g => g.id);
+  const cs = t.origin_country || [];
+  const c = cs[0] || '';
+  if(gs.includes(16) && (c==='JP' || t.original_language==='ja')) return 'anime';
+  if(cs.some(x => ASIA.includes(x)) || ['ko','zh','ja','th','cn'].includes(t.original_language)) return 'drama';
+  return 'serie';
+}
+function normTMDB(t, mt){
+  mt = mt || t.media_type;
+  const isTV = mt === 'tv';
+  const date = isTV ? t.first_air_date : t.release_date;
+  const country = (t.origin_country||[])[0] || t.production_countries?.[0]?.iso_3166_1 || '';
+  return {
+    id:`tmdb:${mt}:${t.id}`, src:'tmdb', srcId:t.id, mediaType:mt,
+    type: isTV ? classifyTV(t) : 'peli',
+    title: (isTV ? t.name : t.title) || '?', orig: (isTV ? t.original_name : t.original_title) || '',
+    year: date ? +date.slice(0,4) : null, date: date || null, country,
+    poster: t.poster_path ? TMDB_IMG + 'w342' + t.poster_path : '',
+    score: t.vote_count > 2 ? t.vote_average : null,
+    genreIds: t.genre_ids || (t.genres||[]).map(g => g.id),
+    lang: t.original_language || ''
+  };
+}
+function normOLsearch(d){
+  return {
+    id:`ol:work:${d.key.replace('/works/','')}`, src:'ol', srcId:d.key.replace('/works/',''), mediaType:'work', type:'libro',
+    title:d.title || '?', orig:'', year:d.first_publish_year || null, country:'',
+    poster: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : '',
+    score: d.ratings_average ? d.ratings_average*2 : null,
+    total: d.number_of_pages_median || null,
+    authors: (d.author_name||[]).slice(0,3).map((n,i) => ({id:(d.author_key||[])[i], name:n}))
+  };
+}
+function normOLwork(w){ // from subject or author works lists
+  const key = (w.key||'').replace('/works/','');
+  const cover = w.cover_id || (w.covers||[]).find(x => x > 0);
+  return {
+    id:`ol:work:${key}`, src:'ol', srcId:key, mediaType:'work', type:'libro',
+    title:w.title || '?', orig:'', year:w.first_publish_year || null, country:'',
+    poster: cover ? `https://covers.openlibrary.org/b/id/${cover}-M.jpg` : '',
+    score:null, authors:(w.authors||[]).filter(a => a.name).map(a => ({id:(a.key||'').replace('/authors/',''), name:a.name}))
+  };
+}
+
+/* ---- search ---- */
+async function searchAll(q, kind){
+  const out = {titles:[], people:[], errors:[], needKey:false};
+  const jobs = [];
+  const tmdbJob = (fn) => jobs.push(fn().catch(e => { if(e instanceof NoKey) out.needKey = true; else out.errors.push(e.message); }));
+  const alJob = (type) => jobs.push(anilist(`query($s:String,$t:MediaType){Page(perPage:12){media(search:$s,type:$t,sort:SEARCH_MATCH,isAdult:false){...F}}} ${AL_F}`, {s:q, t:type})
+      .then(d => out.titles.push(...d.Page.media.map(normAL))).catch(e => out.errors.push(e.message)));
+
+  if(kind === 'all'){
+    alJob(null);
+    tmdbJob(async () => { const d = await tmdb('/search/multi', {query:q, include_adult:false});
+      d.results.forEach(r => { if(r.media_type === 'person') out.people.push(normPersonTMDB(r)); else if(r.media_type==='tv' || r.media_type==='movie'){ if(r.media_type==='tv' && (r.genre_ids||[]).some(g => TV_SKIP_GENRES.includes(g))) return; out.titles.push(normTMDB(r)); } }); });
+    jobs.push(ol(`/search.json?q=${encodeURIComponent(q)}&limit=6&fields=key,title,author_name,author_key,first_publish_year,cover_i,number_of_pages_median,ratings_average`)
+      .then(d => out.titles.push(...d.docs.map(normOLsearch))).catch(e => out.errors.push(e.message)));
+  } else if(kind === 'anime') alJob('ANIME');
+  else if(kind === 'manga') alJob('MANGA');
+  else if(kind === 'drama' || kind === 'serie'){
+    tmdbJob(async () => {
+      const [p1, p2] = await Promise.all([tmdb('/search/tv', {query:q, page:1}), tmdb('/search/tv', {query:q, page:2}).catch(() => ({results:[]}))]);
+      let rs = [...p1.results, ...p2.results].map(r => normTMDB(r, 'tv'));
+      rs = rs.filter(r => kind === 'drama' ? r.type === 'drama' : r.type !== 'drama');
+      out.titles.push(...rs);
+    });
+  } else if(kind === 'peli') tmdbJob(async () => { const d = await tmdb('/search/movie', {query:q}); out.titles.push(...d.results.map(r => normTMDB(r, 'movie'))); });
+  else if(kind === 'libro') jobs.push(ol(`/search.json?q=${encodeURIComponent(q)}&limit=15&fields=key,title,author_name,author_key,first_publish_year,cover_i,number_of_pages_median,ratings_average`).then(d => out.titles.push(...d.docs.map(normOLsearch))).catch(e => out.errors.push(e.message)));
+  else if(kind === 'people'){
+    tmdbJob(async () => { const d = await tmdb('/search/person', {query:q}); out.people.push(...d.results.map(normPersonTMDB)); });
+    jobs.push(anilist(`query($s:String){Page(perPage:8){staff(search:$s){id name{full native} image{medium} primaryOccupations}}}`, {s:q})
+      .then(d => out.people.push(...d.Page.staff.map(s => ({src:'anilist', id:s.id, name:s.name.full, sub:[s.name.native, (s.primaryOccupations||[]).join(', ')].filter(Boolean).join(' · '), img:s.image?.medium||''})))).catch(e => out.errors.push(e.message)));
+  }
+  await Promise.all(jobs);
+  // dedupe
+  const seen = new Set(); out.titles = out.titles.filter(t => !seen.has(t.id) && seen.add(t.id));
+  return out;
+}
+function normPersonTMDB(p){
+  const known = (p.known_for||[]).map(k => k.title || k.name).filter(Boolean).slice(0,2).join(', ');
+  return {src:'tmdb', id:p.id, name:p.name, sub:[p.known_for_department === 'Acting' ? 'Actor/Actriz' : p.known_for_department, known].filter(Boolean).join(' · '), img:p.profile_path ? TMDB_IMG+'w185'+p.profile_path : ''};
+}
+
+/* ---- details ---- */
+async function loadDetails(e){
+  if(e.src === 'tmdb'){
+    const isTV = e.mediaType === 'tv';
+    const d = await tmdb(`/${e.mediaType}/${e.srcId}`, {append_to_response: isTV ? 'aggregate_credits,recommendations' : 'credits,recommendations,release_dates'});
+    let overview = d.overview;
+    if(!overview){ try{ overview = (await tmdb(`/${e.mediaType}/${e.srcId}`, {}, 'en-US')).overview; }catch(_){} }
+    const base = normTMDB(d, e.mediaType);
+    const credits = isTV ? d.aggregate_credits : d.credits;
+    const cast = (credits?.cast||[]).slice(0,18).map(c => ({src:'tmdb', id:c.id, name:c.name, role: isTV ? (c.roles?.[0]?.character||'') : (c.character||''), img:c.profile_path ? TMDB_IMG+'w185'+c.profile_path : ''}));
+    const meta = {
+      ...base, overview, genres:(d.genres||[]).map(g => g.name),
+      total: isTV ? (d.number_of_episodes||null) : null, seasons: isTV ? d.number_of_seasons : null,
+      mstatus: d.status, runtime: d.runtime || (d.episode_run_time||[])[0] || null,
+      network: isTV ? (d.networks||[]).map(n => n.name).slice(0,2).join(', ') : '',
+      next: null, nextLabel: ''
+    };
+    if(isTV && d.next_episode_to_air){ meta.next = d.next_episode_to_air.air_date; meta.nextLabel = `T${d.next_episode_to_air.season_number} E${d.next_episode_to_air.episode_number}`; }
+    if(!isTV && d.release_date && d.release_date >= todayStr()){ meta.next = d.release_date; meta.nextLabel = 'Estreno'; }
+    const recs = (d.recommendations?.results||[]).filter(r => r.media_type !== 'person').slice(0,15).map(r => normTMDB(r, r.media_type || e.mediaType));
+    return {meta, cast, castTitle: 'Reparto', recs, link:`https://www.themoviedb.org/${e.mediaType}/${e.srcId}`};
+  }
+  if(e.src === 'anilist'){
+    const d = await anilist(`query($id:Int){Media(id:$id){...F description(asHtml:false) volumes duration
+      characters(sort:[ROLE,RELEVANCE],perPage:16){edges{role node{name{full}} voiceActors(language:JAPANESE,sort:RELEVANCE){id name{full} image{medium}}}}
+      staff(sort:RELEVANCE,perPage:8){edges{role node{id name{full} image{medium}}}}
+      recommendations(sort:RATING_DESC,perPage:15){nodes{mediaRecommendation{...F}}}}} ${AL_F}`, {id:e.srcId});
+    const m = d.Media, base = normAL(m);
+    let cast;
+    if(m.type === 'ANIME'){
+      const seen = new Set(); cast = [];
+      (m.characters?.edges||[]).forEach(ed => { const va = ed.voiceActors?.[0]; if(va && !seen.has(va.id)){ seen.add(va.id); cast.push({src:'anilist', id:va.id, name:va.name.full, role:ed.node?.name?.full||'', img:va.image?.medium||''}); } });
+    } else {
+      cast = (m.staff?.edges||[]).map(ed => ({src:'anilist', id:ed.node.id, name:ed.node.name.full, role:ed.role, img:ed.node.image?.medium||''}));
+    }
+    const recs = (m.recommendations?.nodes||[]).map(n => n.mediaRecommendation).filter(Boolean).map(normAL);
+    return {meta:{...base, overview:stripHtml(m.description), genres:m.genres||[], volumes:m.volumes}, cast, castTitle: m.type==='ANIME' ? 'Seiyuus (voces)' : 'Autores', recs, link:`https://anilist.co/${m.type.toLowerCase()}/${m.id}`};
+  }
+  if(e.src === 'ol'){
+    const w = await ol(`/works/${e.srcId}.json`);
+    let desc = typeof w.description === 'string' ? w.description : (w.description?.value || '');
+    desc = desc.replace(/\(\[source\].*?\)/g,'').replace(/-{5,}[\s\S]*/,'').trim();
+    let authors = e.authors && e.authors.length ? e.authors : [];
+    if(!authors.length && w.authors){
+      authors = (await runLimited(w.authors.slice(0,3), 3, async a => { const id = a.author.key.replace('/authors/',''); const ad = await ol(`/authors/${id}.json`); return {id, name:ad.name}; })).filter(Boolean);
+    }
+    const cast = authors.filter(a => a.id).map(a => ({src:'ol', id:a.id, name:a.name, role:'Autor/a', img:`https://covers.openlibrary.org/a/olid/${a.id}-M.jpg?default=false`}));
+    const subjects = (w.subjects||[]).filter(s => s.length < 40).slice(0,6);
+    let recs = [];
+    if(subjects[0]){
+      try{ const sd = await ol(`/subjects/${encodeURIComponent(subjects[0].toLowerCase().replace(/\s+/g,'_'))}.json?limit=14`); recs = (sd.works||[]).map(normOLwork).filter(r => r.id !== e.id); }catch(_){}
+    }
+    const cover = (w.covers||[]).find(x => x > 0);
+    return {meta:{title:w.title || e.title, poster: cover ? `https://covers.openlibrary.org/b/id/${cover}-M.jpg` : e.poster, overview:desc, genres:subjects, authors}, cast, castTitle:'Autoría', recs, link:`https://openlibrary.org/works/${e.srcId}`};
+  }
+  return null;
+}
+
+/* ---- people ---- */
+async function loadPerson(src, id){
+  if(src === 'tmdb'){
+    const p = await tmdb(`/person/${id}`, {append_to_response:'combined_credits'});
+    let bio = p.biography;
+    if(!bio){ try{ bio = (await tmdb(`/person/${id}`, {}, 'en-US')).biography; }catch(_){} }
+    const seen = new Map();
+    (p.combined_credits?.cast||[]).forEach(c => {
+      if(c.media_type !== 'tv' && c.media_type !== 'movie') return;
+      if(c.media_type === 'tv' && (c.genre_ids||[]).some(g => TV_SKIP_GENRES.includes(g))) return;
+      if((c.episode_count||2) < 2 && c.media_type === 'tv' && !c.character) return;
+      const e = normTMDB(c, c.media_type); e.role = c.character || '';
+      const prev = seen.get(e.id); if(prev){ if(e.role && !prev.role.includes(e.role)) prev.role += ', ' + e.role; return; }
+      seen.set(e.id, e);
+    });
+    const works = [...seen.values()].sort((a,b) => (b.date||'9999').localeCompare(a.date||'9999'));
+    return {name:p.name, img:p.profile_path ? TMDB_IMG+'w342'+p.profile_path : '', bio, info:[p.birthday ? `Nació el ${+p.birthday.slice(8,10)} ${MONTHS[+p.birthday.slice(5,7)-1]} ${p.birthday.slice(0,4)}` : '', p.place_of_birth].filter(Boolean).join(' · '), works, filters:true, link:`https://www.themoviedb.org/person/${id}`};
+  }
+  if(src === 'anilist'){
+    const d = await anilist(`query($id:Int){Staff(id:$id){id name{full native} image{large} description(asHtml:false) dateOfBirth{year month day} homeTown primaryOccupations
+      characterMedia(perPage:50,sort:START_DATE_DESC){edges{characters{name{full}} node{...F}}}
+      staffMedia(perPage:50,sort:START_DATE_DESC){edges{staffRole node{...F}}}}} ${AL_F}`, {id});
+    const s = d.Staff, seen = new Map();
+    (s.characterMedia?.edges||[]).forEach(ed => { const e = normAL(ed.node); e.role = (ed.characters||[]).map(c => c?.name?.full).filter(Boolean).join(', '); if(!seen.has(e.id)) seen.set(e.id, e); });
+    (s.staffMedia?.edges||[]).forEach(ed => { const e = normAL(ed.node); e.role = ed.staffRole || ''; if(!seen.has(e.id)) seen.set(e.id, e); });
+    const works = [...seen.values()].sort((a,b) => (b.year||9999) - (a.year||9999));
+    const dob = s.dateOfBirth?.year ? `Nació en ${s.dateOfBirth.year}` : '';
+    return {name:s.name.full + (s.name.native ? ` (${s.name.native})` : ''), img:s.image?.large||'', bio:stripHtml(s.description), info:[(s.primaryOccupations||[]).join(', '), dob, s.homeTown].filter(Boolean).join(' · '), works, filters:true, link:`https://anilist.co/staff/${id}`};
+  }
+  if(src === 'ol'){
+    const [a, w] = await Promise.all([ol(`/authors/${id}.json`), ol(`/authors/${id}/works.json?limit=80`)]);
+    const bio = typeof a.bio === 'string' ? a.bio : (a.bio?.value || '');
+    const works = (w.entries||[]).map(x => { const e = normOLwork(x); e.authors = [{id, name:a.name}]; return e; });
+    return {name:a.name, img:`https://covers.openlibrary.org/a/olid/${id}-L.jpg?default=false`, bio, info:[a.birth_date, a.death_date ? '– ' + a.death_date : ''].filter(Boolean).join(' '), works, filters:false, link:`https://openlibrary.org/authors/${id}`};
+  }
+}
+
+/* =============== Rendering: main views =============== */
+function render(){
+  renderBanner();
+  if(view==='lista') renderList();
+  else if(view==='prox') renderProx();
+  else if(view==='parati') renderParati();
+  else renderStats();
+}
+function renderBanner(){
+  $('keyBanner').innerHTML = settings.tmdbKey ? '' : `<div class="banner">🏮 Para buscar <b>dramas, series y películas</b> con portadas, añade tu clave gratuita de TMDB. <button data-act="settings">Configurar</button><br><span style="color:var(--mut)">Anime, manga y libros ya funcionan sin clave.</span></div>`;
+}
+function typeChipsHTML(sel, attr, withAll = true){
+  const tc = [...(withAll?[['all','Todo','✨']]:[]), ...Object.entries(TYPES).map(([k,v]) => [k,v.label,v.emoji])];
+  return tc.map(([k,l,e]) => `<button class="chip ${sel===k?'on':''}" data-${attr}="${k}">${e} ${l}</button>`).join('');
+}
+function renderList(){
+  $('typeChips').innerHTML = typeChipsHTML(fType, 't');
+  const all = Object.values(items);
+  // country chips (only when relevant)
+  const pool = all.filter(i => fType==='all' || i.type===fType);
+  const countries = [...new Set(pool.map(i => i.country).filter(Boolean))];
+  if(countries.length > 1 && ['drama','manga','all','anime','peli'].includes(fType)){
+    const order = ['KR','CN','JP','TH','TW'];
+    countries.sort((a,b) => (order.indexOf(a)+1||99) - (order.indexOf(b)+1||99));
+    $('countryChips').innerHTML = [`<button class="chip small ${fCountry==='all'?'on':''}" data-c="all">🌏 Todos</button>`, ...countries.map(c => `<button class="chip small ${fCountry===c?'on':''}" data-c="${c}">${flag(c)} ${COUNTRY_NAMES[c]||c}</button>`)].join('');
+    $('countryChips').style.display = '';
+  } else { $('countryChips').style.display = 'none'; if(fCountry!=='all' && !countries.includes(fCountry)) fCountry = 'all'; }
+  const sc = [['all','Todos'], ...Object.entries(STATUS).map(([k,v]) => [k,v.short])];
+  $('statusChips').innerHTML = sc.map(([k,l]) => `<button class="chip small ${fStatus===k?'on':''}" data-s="${k}">${l}</button>`).join('');
+  $('sTotal').textContent = all.length;
+  $('sNow').textContent = all.filter(i => i.status==='curso').length;
+  $('sDone').textContent = all.filter(i => i.status==='hecho').length;
+
+  let list = pool.filter(i => (fCountry==='all'||i.country===fCountry) && (fStatus==='all'||i.status===fStatus)
+    && (!query || (i.title + ' ' + (i.orig||'') + ' ' + (i.alt||'')).toLowerCase().includes(query)));
+  const sorters = {
+    updated:(a,b)=>(b.updated||0)-(a.updated||0),
+    title:(a,b)=>a.title.localeCompare(b.title,'es'),
+    rating:(a,b)=>(b.rating||0)-(a.rating||0),
+    score:(a,b)=>(b.score||0)-(a.score||0),
+    progress:(a,b)=>pct(b)-pct(a)
+  };
+  list.sort(sorters[sortBy]);
+  $('count').textContent = list.length + (list.length===1?' título':' títulos');
+  if(!list.length){
+    $('list').innerHTML = all.length
+      ? `<div class="empty"><div>🔎</div>Nada coincide con el filtro.</div>`
+      : `<div class="empty"><div>📚</div>Tu lista está vacía.<br>Pulsa <b>🔍</b> para buscar un anime, manga, drama, serie, película o libro.</div>`;
+    return;
+  }
+  $('list').innerHTML = list.map(itemRow).join('');
+}
+function itemRow(it){
+  const T = TYPES[it.type], S = STATUS[it.status];
+  const p = pct(it), pt = progText(it);
+  const showPlus = T.unit && it.status !== 'hecho';
+  const nd = it.next ? daysUntil(it.next) : null;
+  return `<div class="item" data-open="${esc(it.id)}">
+    ${coverHTML(it)}
+    <div class="info">
+      <h3>${esc(it.title)}</h3>
+      <div class="meta"><span class="badge" style="color:${T.color}">${T.emoji} ${T.label}</span>${it.country?`<span>${flag(it.country)}</span>`:''}<span>${S.dot} ${S.short}</span>
+        ${it.rating?`<span class="myr">★ ${it.rating}</span>`:''}
+        ${nd!==null && nd>=0?`<span class="badge date">📅 ${relDay(nd)}</span>`:''}</div>
+      ${T.unit ? `<div class="bar"><i style="width:${p}%;background:${T.color}"></i></div>`:''}
+      ${pt?`<div class="prog">${pt}${it.total&&T.unit?` · ${p}%`:''}</div>`:''}
+    </div>
+    ${showPlus?`<button class="plus" data-plus="${esc(it.id)}" aria-label="Sumar uno">+1</button>`:''}
+  </div>`;
+}
+
+/* ---- Próximos ---- */
+let refreshing = false;
+function renderProx(){
+  const withD = Object.values(items).filter(i => i.next).map(i => ({it:i, d:daysUntil(i.next)}));
+  const up = withD.filter(x => x.d >= 0).sort((a,b) => a.d-b.d);
+  const recent = withD.filter(x => x.d < 0 && x.d >= -7).sort((a,b) => b.d-a.d);
+  const last = settings.lastRefresh ? new Date(settings.lastRefresh) : null;
+  let h = `<button class="wide" data-act="refresh" ${refreshing?'disabled':''}>${refreshing?'<div class="spin"></div> Actualizando…':'🔄 Actualizar fechas de estreno'}</button>
+    <p class="hint">${last ? `Última actualización: ${last.getDate()} ${MONTHS[last.getMonth()]}, ${String(last.getHours()).padStart(2,'0')}:${String(last.getMinutes()).padStart(2,'0')}. ` : ''}Se buscan nuevos episodios, temporadas y estrenos de lo que sigues.</p>`;
+  if(!up.length && !recent.length){
+    $('proxBody').innerHTML = h + `<div class="empty"><div>📅</div>No hay estrenos próximos en tu lista.<br>Los anime y dramas en emisión aparecerán aquí con la fecha del siguiente episodio.</div>`;
+    return;
+  }
+  const row = ({it,d}) => `<div class="item" data-open="${esc(it.id)}">
+      ${coverHTML(it)}
+      <div class="info"><h3>${esc(it.title)}</h3>
+        <div class="meta"><span class="badge" style="color:${TYPES[it.type].color}">${TYPES[it.type].emoji} ${TYPES[it.type].label}</span>${it.country?`<span>${flag(it.country)}</span>`:''}<span>${fmtDate(it.next)}</span></div>
+        <div class="prog">${esc(it.nextLabel || 'Estreno')}${progText(it) ? ' · vas por ' + progText(it) : ''}</div>
+      </div>
+      <div class="when ${d===0?'today':''}">${d===0?'<b>¡Hoy!</b>':d<0?`<b>${-d}</b><span>días ya</span>`:`<b>${d}</b><span>${d===1?'día':'días'}</span>`}</div>
+    </div>`;
+  const week = up.filter(x => x.d <= 7), later = up.filter(x => x.d > 7);
+  if(week.length) h += `<h2 class="sec">Esta semana</h2><div class="list">${week.map(row).join('')}</div>`;
+  if(later.length) h += `<h2 class="sec">Más adelante</h2><div class="list">${later.map(row).join('')}</div>`;
+  if(recent.length) h += `<h2 class="sec">Ya disponibles</h2><div class="list">${recent.map(row).join('')}</div>`;
+  $('proxBody').innerHTML = h;
+}
+async function refreshUpcoming(manual){
+  if(refreshing) return; refreshing = true; if(view==='prox') render();
+  let changed = 0; const today = todayStr();
+  try{
+    const all = Object.values(items);
+    // AniList anime in batch
+    const alIds = all.filter(i => i.src==='anilist' && i.mediaType==='ANIME' && i.status!=='aband' && i.mstatus!=='FINISHED').map(i => i.srcId);
+    for(let k = 0; k < alIds.length; k += 50){
+      try{
+        const d = await anilist(`query($ids:[Int]){Page(perPage:50){media(id_in:$ids,type:ANIME){...F}}} ${AL_F}`, {ids: alIds.slice(k, k+50)});
+        d.Page.media.forEach(m => { const n = normAL(m), it = items[n.id]; if(it && applyMeta(it, n)) changed++; });
+      }catch(e){}
+    }
+    // TMDB tv (incl. completed: catches new seasons) and pending movies
+    if(settings.tmdbKey){
+      const tv = all.filter(i => i.src==='tmdb' && i.status!=='aband' && (i.mediaType==='tv' ? i.mstatus!=='Ended' && i.mstatus!=='Canceled' : (i.status!=='hecho' && (!i.date || i.date >= today))));
+      await runLimited(tv, 4, async it => {
+        const d = await tmdb(`/${it.mediaType}/${it.srcId}`);
+        const n = normTMDB(d, it.mediaType);
+        n.mstatus = d.status;
+        if(it.mediaType==='tv'){ n.total = d.number_of_episodes || null; n.seasons = d.number_of_seasons; const ne = d.next_episode_to_air; n.next = ne ? ne.air_date : null; n.nextLabel = ne ? `T${ne.season_number} E${ne.episode_number}` : ''; }
+        else { n.next = d.release_date && d.release_date >= today ? d.release_date : null; n.nextLabel = n.next ? 'Estreno' : ''; }
+        if(applyMeta(items[it.id], n)) changed++;
+      });
+    }
+    settings.lastRefresh = Date.now(); saveSettings();
+    if(changed) persist();
+    if(manual) toast(changed ? `${changed} título${changed>1?'s':''} actualizado${changed>1?'s':''}` : 'Todo al día');
+  }finally{ refreshing = false; render(); }
+}
+function applyMeta(it, n){ // copy fresh public data into a saved item; returns true if changed
+  if(!it || !n) return false;
+  let ch = false;
+  ['poster','score','total','seasons','mstatus','country','orig','genres'].forEach(k => {
+    if(n[k] !== undefined && n[k] !== null && n[k] !== '' && JSON.stringify(n[k]) !== JSON.stringify(it[k])){ it[k] = n[k]; ch = true; }
+  });
+  if('next' in n){
+    const keepManual = it.nextManual && it.next && it.next >= todayStr();
+    if(!keepManual && (n.next||null) !== (it.next||null)){ it.next = n.next || null; it.nextLabel = n.nextLabel || ''; it.nextManual = false; ch = true; }
+  }
+  return ch;
+}
+
+/* ---- Para ti (suggestions) ---- */
+let sugg = {state:'idle', list:[], basis:'', fType:'all', sig:''};
+function suggSignature(){ return Object.values(items).filter(i => i.rating).map(i => i.id + i.rating).sort().join('|') + '#' + Object.keys(items).length; }
+function renderParati(){
+  if(sugg.state === 'idle' || ((sugg.state === 'done' || sugg.state === 'empty') && sugg.sig !== suggSignature() && !sugg.userViewed)){ buildSuggestions(); }
+  let h = `<div class="chips">${typeChipsHTML(sugg.fType, 'sf')}</div>`;
+  if(sugg.state === 'loading'){ $('paratiBody').innerHTML = h + `<div class="thinking"><div class="spin"></div>Buscando recomendaciones a partir de tus notas…</div>`; return; }
+  if(sugg.state === 'empty'){ $('paratiBody').innerHTML = `<div class="empty"><div>✨</div>Pon nota (del 1 al 10) a lo que has visto o leído.<br>Con tus títulos de <b>7 o más</b> te recomendaré cosas parecidas.</div>`; return; }
+  if(sugg.state === 'error'){ $('paratiBody').innerHTML = h + `<p class="hint">${esc(sugg.err)}</p><button class="wide" data-act="resugg">Reintentar</button>`; return; }
+  const list = sugg.list.filter(s => !items[s.entry.id] && (sugg.fType==='all' || s.entry.type===sugg.fType));
+  h += `<p class="hint" style="margin-top:0">${sugg.basis === 'rated' ? 'Basado en tus títulos mejor valorados.' : 'Aún no tienes notas altas: basado en lo que estás viendo o has terminado. Pon nota para afinar.'}</p>`;
+  if(!list.length) h += `<div class="empty"><div>🤷</div>No hay sugerencias de este tipo todavía.</div>`;
+  else h += `<div class="list">${list.slice(0,40).map(s => {
+      const e = s.entry, T = TYPES[e.type];
+      return `<div class="item" data-sug="${esc(e.id)}">${coverHTML(e)}
+        <div class="info"><h3>${esc(e.title)}</h3>
+          <div class="meta"><span class="badge" style="color:${T.color}">${T.emoji} ${T.label}</span>${e.country?`<span>${flag(e.country)}</span>`:''}${e.year?`<span>${e.year}</span>`:''}${e.score?`<span>★ ${fmtScore(e.score)}</span>`:''}</div>
+          <div class="sugg-why">Porque te gustó ${s.because.slice(0,2).map(t => `<b>${esc(t)}</b>`).join(' y ')}${s.because.length>2?` y ${s.because.length-2} más`:''}</div>
+        </div>
+        <button class="plus" data-sugadd="${esc(e.id)}" aria-label="Añadir">＋</button></div>`;
+    }).join('')}</div>`;
+  h += `<button class="wide" data-act="resugg" style="margin-top:14px">🔄 Recalcular sugerencias</button>`;
+  $('paratiBody').innerHTML = h;
+}
+async function fetchRecs(seed){
+  if(seed.src === 'tmdb'){
+    const d = await tmdb(`/${seed.mediaType}/${seed.srcId}/recommendations`);
+    let rs = d.results || [];
+    if(rs.length < 5){ const s2 = await tmdb(`/${seed.mediaType}/${seed.srcId}/similar`).catch(() => ({results:[]})); rs = rs.concat(s2.results||[]); }
+    return rs.filter(r => !(r.genre_ids||[]).some(g => TV_SKIP_GENRES.includes(g))).map(r => normTMDB(r, r.media_type || seed.mediaType));
+  }
+  if(seed.src === 'anilist'){
+    const d = await anilist(`query($id:Int){Media(id:$id){recommendations(sort:RATING_DESC,perPage:20){nodes{rating mediaRecommendation{...F}}}}} ${AL_F}`, {id:seed.srcId});
+    return (d.Media.recommendations?.nodes||[]).filter(n => n.mediaRecommendation && n.rating > 0).map(n => normAL(n.mediaRecommendation));
+  }
+  if(seed.src === 'ol'){
+    const det = await loadDetails(seed); return det.recs || [];
+  }
+  return [];
+}
+async function buildSuggestions(){
+  const all = Object.values(items).filter(i => i.src !== 'manual');
+  let seeds = all.filter(i => i.rating >= 7).sort((a,b) => b.rating-a.rating || b.updated-a.updated).slice(0,12);
+  let basis = 'rated';
+  if(!seeds.length){ seeds = all.filter(i => i.status==='hecho' || i.status==='curso').sort((a,b) => b.updated-a.updated).slice(0,6); basis = 'recent'; }
+  if(!settings.tmdbKey) seeds = seeds.filter(s => s.src !== 'tmdb');
+  sugg.sig = suggSignature(); sugg.userViewed = false;
+  if(!seeds.length){ sugg.state = 'empty'; if(view==='parati') renderParati(); return; }
+  sugg.state = 'loading'; if(view==='parati') renderParati();
+  const pool = new Map(); let ok = 0;
+  await runLimited(seeds, 3, async seed => {
+    const recs = await fetchRecs(seed); ok++;
+    const w = seed.rating ? Math.max(1, seed.rating - 5) : 1;
+    recs.forEach((r, idx) => {
+      if(items[r.id] || r.id === seed.id) return;
+      const p = pool.get(r.id) || {entry:r, score:0, because:[]};
+      p.score += w * (1 - idx/40);
+      if(!p.because.includes(seed.title)) p.because.push(seed.title);
+      pool.set(r.id, p);
+    });
+  });
+  if(!ok){ sugg.state = 'error'; sugg.err = 'No se pudieron cargar las recomendaciones. Revisa tu conexión.'; }
+  else { sugg.list = [...pool.values()].sort((a,b) => b.score-a.score || (b.entry.score||0)-(a.entry.score||0)); sugg.basis = basis; sugg.state = 'done'; }
+  if(view==='parati') renderParati();
+}
+
+/* ---- Stats ---- */
+function hbars(rows){
+  const max = Math.max(1, ...rows.map(r => r.v));
+  return rows.map(r => `<div class="hbar"><span>${r.l}</span><div class="track"><i style="width:${r.v/max*100}%;background:${r.c}"></i></div><b>${r.v}</b></div>`).join('');
+}
+function renderStats(){
+  const all = Object.values(items);
+  if(!all.length){ $('statsBody').innerHTML = `<div class="empty"><div>📊</div>Añade títulos a tu lista para ver tus estadísticas.</div>`; return; }
+  const rated = all.filter(i => i.rating);
+  const avg = rated.length ? (rated.reduce((s,i) => s+i.rating, 0) / rated.length).toFixed(1) : '–';
+  const year = new Date().getFullYear();
+  const doneYear = all.filter(i => i.status==='hecho' && i.doneAt && new Date(i.doneAt).getFullYear()===year).length;
+  const sum = t => all.filter(i => i.type===t).reduce((s,i) => s+(i.prog||0), 0);
+  let h = `<div class="stats">
+      <div class="stat"><b>${all.length}</b><span>Títulos</span></div>
+      <div class="stat"><b>${doneYear}</b><span>Terminados en ${year}</span></div>
+      <div class="stat"><b style="color:var(--acc2)">${avg}</b><span>Tu nota media</span></div>
+    </div>`;
+  h += `<h2 class="sec">Por tipo</h2><div class="panel">${hbars(Object.entries(TYPES).map(([k,v]) => ({l:`${v.emoji} ${v.label}`, v:all.filter(i=>i.type===k).length, c:v.color})))}</div>`;
+  const byC = {}; all.forEach(i => { if(i.country) byC[i.country] = (byC[i.country]||0) + 1; });
+  const cRows = Object.entries(byC).sort((a,b) => b[1]-a[1]).slice(0,7);
+  if(cRows.length) h += `<h2 class="sec">Por país</h2><div class="panel">${hbars(cRows.map(([c,v]) => ({l:`${flag(c)} ${COUNTRY_NAMES[c]||c}`, v, c:'var(--drama)'})))}</div>`;
+  h += `<h2 class="sec">Por estado</h2><div class="panel">${hbars(Object.entries(STATUS).map(([k,v]) => ({l:v.short, v:all.filter(i=>i.status===k).length, c:v.color})))}</div>`;
+  h += `<h2 class="sec">Lo que llevas</h2><div class="consume">
+    ${['anime','drama','serie','manga','libro'].map(t => `<div class="stat"><b style="color:${TYPES[t].color}">${sum(t).toLocaleString('es')}</b><span>${TYPES[t].plural}</span></div>`).join('')}
+    <div class="stat"><b style="color:var(--peli)">${all.filter(i=>i.type==='peli'&&i.status==='hecho').length}</b><span>${TYPES.peli.plural}</span></div>
+  </div>`;
+  const top = rated.slice().sort((a,b) => b.rating-a.rating || (b.updated||0)-(a.updated||0)).slice(0,10);
+  if(top.length) h += `<h2 class="sec">Tus mejor valorados</h2><div class="panel">${top.map((it,i) => `<div class="rank" data-open="${esc(it.id)}"><span class="n">${i+1}</span>${coverHTML(it)}<span class="t">${esc(it.title)}</span><span class="myr">★ ${it.rating}</span></div>`).join('')}</div>`;
+  const done = all.filter(i => i.status==='hecho' && i.doneAt).sort((a,b) => b.doneAt-a.doneAt).slice(0,5);
+  if(done.length) h += `<h2 class="sec">Últimos terminados</h2><div class="panel">${done.map(it => { const d = new Date(it.doneAt); return `<div class="rank" data-open="${esc(it.id)}">${coverHTML(it)}<span class="t">${esc(it.title)}</span><span class="count">${d.getDate()} ${MONTHS[d.getMonth()]}</span></div>`; }).join('')}</div>`;
+  $('statsBody').innerHTML = h;
+}
+
+/* =============== Sheets (stacked) =============== */
+const sheets = [];
+function pushSheet(){
+  const bg = document.createElement('div'); bg.className = 'sheet-bg';
+  const el = document.createElement('div'); el.className = 'sheet';
+  bg.appendChild(el); document.body.appendChild(bg);
+  const s = {bg, el, closed:false};
+  bg.addEventListener('click', e => { if(e.target === bg || e.target.closest('[data-close]')){ e.stopPropagation(); if(sheets[sheets.length-1] === s) popSheet(); } });
+  sheets.push(s); document.body.style.overflow = 'hidden';
+  return s;
+}
+function popSheet(){ const s = sheets.pop(); if(s){ s.closed = true; s.ctl?.abort?.(); s.bg.remove(); } if(!sheets.length) document.body.style.overflow = ''; render(); }
+const topBar = (title) => `<div class="sh-top"><h2>${title}</h2><button class="x" data-close>✕</button></div>`;
+
+/* ---- Search sheet ---- */
+function openSearch(){
+  const s = pushSheet();
+  s.kind = fType !== 'all' ? fType : 'all'; s.q = ''; s.res = null; s.seq = 0;
+  s.el.innerHTML = topBar('Buscar') + `
+    <form class="search" style="margin-bottom:10px" data-sform><span>🔍</span><input type="search" placeholder="Título, actor o autor…" enterkeyhint="search" autocomplete="off" data-sq></form>
+    <div class="chips" data-skinds></div>
+    <div data-sres><p class="hint">Busca en AniList (anime y manga), TMDB (dramas, series y películas) y Open Library (libros). También puedes buscar actores, actrices, seiyuus y autores.</p></div>`;
+  const kinds = () => { s.el.querySelector('[data-skinds]').innerHTML = [['all','✨ Todo'], ...Object.entries(TYPES).map(([k,v]) => [k, v.emoji+' '+v.label]), ['people','🎭 Personas']].map(([k,l]) => `<button class="chip small ${s.kind===k?'on':''}" data-kind="${k}">${l}</button>`).join(''); };
+  kinds();
+  const input = s.el.querySelector('[data-sq]');
+  setTimeout(() => input.focus(), 250);
+  let deb;
+  const go = async () => {
+    const q = input.value.trim(); const box = s.el.querySelector('[data-sres]');
+    if(q.length < 2){ return; }
+    const my = ++s.seq;
+    box.innerHTML = `<div class="thinking"><div class="spin"></div>Buscando…</div>`;
+    let r; try{ r = await searchAll(q, s.kind); }catch(e){ r = {titles:[], people:[], errors:[e.message]}; }
+    if(my !== s.seq || s.closed) return;
+    s.res = r; drawResults();
+  };
+  const drawResults = () => {
+    const r = s.res, box = s.el.querySelector('[data-sres]');
+    let h = '';
+    if(r.needKey) h += `<div class="banner" style="margin-top:0">Para dramas, series, películas y actores hace falta la clave de TMDB. <button data-act="settings">Configurar</button></div>`;
+    if(r.people.length) h += `<h2 class="sec">Personas</h2>` + r.people.slice(0,8).map(p => `<div class="res" data-person="${p.src}:${p.id}"><div class="ph">${p.img?`<img src="${esc(p.img)}" loading="lazy" referrerpolicy="no-referrer" alt="">`:''}</div><div class="info"><h4>${esc(p.name)}</h4><div class="meta">${esc(p.sub||'')}</div></div><span style="color:var(--mut)">›</span></div>`).join('');
+    if(r.titles.length){
+      s.results = r.titles;
+      const order = s.kind==='all' ? Object.keys(TYPES) : [s.kind];
+      order.forEach(t => {
+        const ts = r.titles.filter(x => x.type === t); if(!ts.length) return;
+        if(s.kind==='all') h += `<h2 class="sec">${TYPES[t].emoji} ${TYPES[t].label}</h2>`;
+        h += ts.slice(0, s.kind==='all' ? 6 : 30).map(e => resultRow(e)).join('');
+      });
+    }
+    if(!r.titles.length && !r.people.length && !r.needKey) h += `<div class="empty"><div>🤔</div>Sin resultados.${r.errors.length?'<br>Comprueba tu conexión.':''}</div>`;
+    h += `<button class="wide" data-manual style="margin-top:16px">✍️ No lo encuentro: añadir a mano</button>`;
+    box.innerHTML = h;
+  };
+  s.drawResults = drawResults;
+  input.addEventListener('input', () => { clearTimeout(deb); deb = setTimeout(go, 450); });
+  s.el.querySelector('[data-sform]').addEventListener('submit', e => { e.preventDefault(); input.blur(); clearTimeout(deb); go(); });
+  s.el.addEventListener('click', e => {
+    const k = e.target.closest('[data-kind]'); if(k){ s.kind = k.dataset.kind; kinds(); go(); return; }
+    const add = e.target.closest('[data-quick]');
+    if(add){ e.stopPropagation(); const en = s.results.find(x => x.id === add.dataset.quick); if(en && !items[en.id]){ addEntry(en, 'pend'); toast('Añadido a Pendientes ✓'); drawResults(); } return; }
+    if(e.target.closest('[data-manual]')){ openManual(input.value.trim(), s.kind); return; }
+    const pr = e.target.closest('[data-person]'); if(pr){ const i = pr.dataset.person.indexOf(':'); openPerson(pr.dataset.person.slice(0,i), pr.dataset.person.slice(i+1)); return; }
+    const o = e.target.closest('[data-res]'); if(o){ const en = s.results.find(x => x.id === o.dataset.res); if(en) openDetail(en); }
+  });
+}
+function resultRow(e){
+  const T = TYPES[e.type], inList = !!items[e.id];
+  const bits = [e.country ? flag(e.country) : '', e.year, e.format && e.src==='anilist' ? e.format.replace('_',' ') : '', e.total ? `${e.total} ${T.short}` : '', e.authors?.length ? e.authors.map(a => a.name).join(', ') : '', e.score ? `★ ${fmtScore(e.score)}` : ''].filter(Boolean).map(x => esc(x)).join(' · ');
+  return `<div class="res" data-res="${esc(e.id)}">${coverHTML(e)}<div class="info"><h4>${esc(e.title)}</h4>${e.orig && e.orig !== e.title ? `<div class="meta" style="margin-bottom:3px">${esc(e.orig)}</div>`:''}<div class="meta">${bits}</div></div>
+    <button class="addb ${inList?'done':''}" data-quick="${esc(e.id)}" aria-label="Añadir">${inList?'✓':'＋'}</button></div>`;
+}
+function openManual(title, kind){
+  const s = pushSheet();
+  let type = TYPES[kind] ? kind : 'drama';
+  const draw = () => {
+    s.el.innerHTML = topBar('Añadir a mano') + `
+      <label>Título</label><input class="field" data-mt value="${esc(title)}">
+      <label>Tipo</label><div class="seg">${Object.entries(TYPES).map(([k,v]) => `<button class="chip small ${type===k?'on':''}" data-mtype="${k}">${v.emoji} ${v.label}</button>`).join('')}</div>
+      <button class="btn pri" style="width:100%;margin-top:22px" data-msave>Añadir</button>`;
+  };
+  draw();
+  s.el.addEventListener('click', e => {
+    const t = e.target.closest('[data-mtype]'); if(t){ title = s.el.querySelector('[data-mt]').value; type = t.dataset.mtype; draw(); return; }
+    if(e.target.closest('[data-msave]')){
+      const ti = s.el.querySelector('[data-mt]').value.trim(); if(!ti) return;
+      const en = {id:'m:' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), src:'manual', type, title:ti, orig:'', poster:'', country:''};
+      addEntry(en, 'pend'); popSheet(); openDetail(items[en.id]); toast('Añadido ✓');
+    }
+  });
+}
+
+/* ---- Add / detail ---- */
+function addEntry(e, status){
+  const it = {
+    id:e.id, src:e.src, srcId:e.srcId, mediaType:e.mediaType, type:e.type, title:e.title, orig:e.orig||'', alt:e.alt||'',
+    year:e.year||null, date:e.date||null, country:e.country||'', poster:e.poster||'', score:e.score||null, genres:e.genres||[],
+    total:e.total||null, seasons:e.seasons||null, mstatus:e.mstatus||'', next:e.next||null, nextLabel:e.nextLabel||'',
+    authors:e.authors||null, status, prog:null, season:null, rating:0, notes:'', created:Date.now(), updated:Date.now(), doneAt:null
+  };
+  if(status === 'hecho'){ it.doneAt = Date.now(); if(it.total) it.prog = it.total; }
+  if((it.type==='drama'||it.type==='serie') && status !== 'pend') it.season = 1;
+  saveItem(it);
+  return it;
+}
+function openDetail(entry){
+  const s = pushSheet();
+  s.entry = {...entry}; s.det = null; s.err = '';
+  s.draw = () => { if(!s.closed){ const st = s.el.scrollTop; s.el.innerHTML = detailHTML(s); s.el.scrollTop = st; } };
+  s.draw();
+  if(entry.src !== 'manual'){
+    loadDetails(entry).then(d => {
+      if(s.closed) return;
+      s.det = d; Object.assign(s.entry, Object.fromEntries(Object.entries(d.meta).filter(([k,v]) => !['id','src','srcId','mediaType'].includes(k) && v !== undefined && v !== null && v !== '')));
+      const it = items[entry.id]; if(it){ if(applyMeta(it, d.meta)){ if(d.meta.authors && !it.authors) it.authors = d.meta.authors; persist(); } }
+      s.draw();
+    }).catch(err => { if(s.closed) return; s.err = err instanceof NoKey ? 'nokey' : (err.message || 'Error'); s.draw(); });
+  }
+  s.el.addEventListener('click', e => detailClick(s, e));
+  s.el.addEventListener('change', e => detailChange(s, e));
+  s.el.addEventListener('input', e => { if(e.target.matches('[data-notes]')){ clearTimeout(s.nt); s.nt = setTimeout(() => { const it = items[s.entry.id]; if(it){ it.notes = e.target.value; saveItem(it); } }, 500); } });
+}
+function detailHTML(s){
+  const e = s.entry, it = items[e.id], d = s.det, T = TYPES[e.type] || TYPES.serie;
+  const meta = [e.country ? `${flag(e.country)} ${COUNTRY_NAMES[e.country]||e.country}` : '', e.year, e.format && e.src==='anilist' ? e.format.replace('_',' ') : '',
+    e.seasons ? `${e.seasons} temporada${e.seasons>1?'s':''}` : '', e.total ? `${e.total} ${T.unit ? T.unit.toLowerCase()+'s' : ''}` : '', e.runtime ? `${e.runtime} min` : '', e.network].filter(Boolean).map(x => esc(x)).join(' · ');
+  let h = topBar(`${T.emoji} ${T.label}`) + `<div class="hero">${coverHTML(e)}<div style="flex:1;min-width:0">
+      <h1>${esc(e.title)}</h1>${e.orig && e.orig !== e.title ? `<div class="orig">${esc(e.orig)}</div>`:''}
+      <div class="meta">${meta}</div>
+      ${e.authors?.length ? `<div class="meta" style="margin-top:4px">${esc(e.authors.map(a => a.name).join(', '))}</div>`:''}
+      <div class="scores">${e.score ? `<div class="score"><b>${fmtScore(e.score)}</b>${e.src==='tmdb'?'TMDB':e.src==='anilist'?'AniList':'lectores'}</div>`:''}${it?.rating ? `<div class="score me"><b>${it.rating}</b>tu nota</div>`:''}</div>
+    </div></div>`;
+  if(it){
+    const nextVal = it.next || '';
+    h += `<div class="track-box">
+      <span class="lbl">Estado</span><div class="seg">${Object.entries(STATUS).map(([k,v]) => `<button class="chip small ${it.status===k?'on':''}" data-st="${k}">${v.label}</button>`).join('')}</div>
+      ${T.unit ? `<span class="lbl">${T.unit} por el que vas</span>
+        <div class="stepper"><button data-step="-1">−</button><input class="field" type="number" inputmode="numeric" min="0" value="${it.prog ?? ''}" placeholder="0" data-prog><button data-step="1">+</button>
+        <span class="of">de</span><input class="field" style="max-width:76px;text-align:center" type="number" inputmode="numeric" min="0" value="${it.total ?? ''}" placeholder="?" data-total></div>
+        ${(it.type==='drama'||it.type==='serie') ? `<span class="lbl">Temporada</span><div class="stepper" style="max-width:220px"><button data-sstep="-1">−</button><input class="field" type="number" inputmode="numeric" min="1" value="${it.season ?? ''}" placeholder="1" data-season><button data-sstep="1">+</button></div>` : ''}` : ''}
+      <span class="lbl">Tu nota ${it.rating ? `· <b style="color:var(--acc2)">${it.rating}/10</b>` : '(toca para puntuar)'}</span>
+      <div class="rate10">${[1,2,3,4,5,6,7,8,9,10].map(n => `<button class="${it.rating===n?'on':''}" data-rate="${n}">${n}</button>`).join('')}</div>
+      <span class="lbl">Próximo estreno ${it.nextLabel ? `· ${esc(it.nextLabel)}` : ''}</span>
+      <input class="field" type="date" value="${nextVal}" data-next>
+      <span class="lbl">Notas</span><textarea class="field" data-notes placeholder="Dónde verlo, opinión…">${esc(it.notes||'')}</textarea>
+      <button class="btn del" style="width:100%;margin-top:14px" data-del>🗑 Quitar de mi lista</button>
+    </div>`;
+  } else {
+    h += `<div class="btnrow" style="margin-top:16px"><button class="btn pri" data-add="pend">＋ Quiero verlo</button></div>
+      <div class="btnrow" style="margin-top:8px"><button class="btn sec" data-add="curso">▶ Lo estoy viendo</button><button class="btn sec" data-add="hecho">✓ Ya lo terminé</button></div>`;
+  }
+  if(!d && !s.err && e.src !== 'manual') h += `<div class="thinking"><div class="spin"></div>Cargando ficha…</div>`;
+  if(s.err === 'nokey') h += `<div class="banner">Para ver la ficha completa, el reparto y las recomendaciones añade tu clave de TMDB. <button data-act="settings">Configurar</button></div>`;
+  else if(s.err) h += `<p class="hint">No se pudo cargar la ficha (${esc(s.err)}).</p>`;
+  if(e.overview) h += `<div class="overview" data-expand>${esc(e.overview)}</div>`;
+  if(e.genres?.length) h += `<div class="genres">${e.genres.slice(0,8).map(g => `<span>${esc(g)}</span>`).join('')}</div>`;
+  if(d?.cast?.length) h += `<h2 class="sec">${d.castTitle}</h2><div class="hscroll">${d.cast.map(p => `<div class="person" data-person="${p.src}:${p.id}"><div class="ph">${p.img?`<img src="${esc(p.img)}" loading="lazy" referrerpolicy="no-referrer" alt="" onerror="this.remove()">`:'👤'}</div><b>${esc(p.name)}</b>${p.role?`<small>${esc(p.role)}</small>`:''}</div>`).join('')}</div>`;
+  if(d?.recs?.length){ s.recs = d.recs; h += `<h2 class="sec">Si te gusta, prueba</h2><div class="hscroll">${d.recs.map(r => pcard(r, 'data-rec')).join('')}</div>`; }
+  if(d?.link) h += `<a class="ext" href="${d.link}" target="_blank" rel="noopener">Ver en ${e.src==='tmdb'?'TMDB':e.src==='anilist'?'AniList':'Open Library'} ↗</a>`;
+  return h;
+}
+function pcard(r, attr, sub){
+  const inList = !!items[r.id];
+  return `<div class="pcard" ${attr}="${esc(r.id)}"><div class="po" style="background:${r.poster?'var(--card2)':TYPES[r.type].color}">${posterInner(r)}</div>${inList?'<span class="in">✓</span>':''}${r.score?`<span class="sc">★ ${fmtScore(r.score)}</span>`:''}<b>${esc(r.title)}</b><small>${esc(sub ?? [r.country?flag(r.country):'', r.year].filter(Boolean).join(' '))}</small></div>`;
+}
+function detailClick(s, e){
+  const t = e.target;
+  if(t.closest('[data-expand]')){ t.closest('[data-expand]').classList.toggle('open'); return; }
+  const it = items[s.entry.id];
+  const add = t.closest('[data-add]'); if(add){ addEntry(s.entry, add.dataset.add); toast('Añadido ✓'); s.draw(); return; }
+  const p = t.closest('[data-person]'); if(p){ const i = p.dataset.person.indexOf(':'); openPerson(p.dataset.person.slice(0,i), p.dataset.person.slice(i+1)); return; }
+  const r = t.closest('[data-rec]'); if(r){ const en = (s.recs||[]).find(x => x.id === r.dataset.rec); if(en) openDetail(items[en.id] || en); return; }
+  if(!it) return;
+  const st = t.closest('[data-st]');
+  if(st){ it.status = st.dataset.st; if(it.status==='hecho'){ it.doneAt = it.doneAt || Date.now(); if(it.total && TYPES[it.type].unit) it.prog = it.total; } else it.doneAt = null; if(it.status==='curso' && (it.type==='drama'||it.type==='serie') && !it.season) it.season = 1; saveItem(it); s.draw(); return; }
+  const step = t.closest('[data-step]');
+  if(step){ it.prog = Math.max(0, (it.prog||0) + (+step.dataset.step)); if(it.prog > 0 && (it.status==='pend'||it.status==='pausa')) it.status = 'curso'; if(it.total && it.prog >= it.total){ it.prog = it.total; if(it.status !== 'hecho'){ it.status = 'hecho'; it.doneAt = Date.now(); toast('¡Completado! 🎉'); } } saveItem(it); s.draw(); return; }
+  const ss = t.closest('[data-sstep]'); if(ss){ it.season = Math.max(1, (it.season||1) + (+ss.dataset.sstep)); saveItem(it); s.draw(); return; }
+  const rt = t.closest('[data-rate]'); if(rt){ const n = +rt.dataset.rate; it.rating = it.rating === n ? 0 : n; saveItem(it); s.draw(); return; }
+  const del = t.closest('[data-del]');
+  if(del){ if(!del.dataset.confirm){ del.dataset.confirm = '1'; del.textContent = '¿Seguro? Toca otra vez para quitar'; return; } removeItem(it.id); toast('Quitado de tu lista'); s.draw(); }
+}
+function detailChange(s, e){
+  const it = items[s.entry.id]; if(!it) return;
+  const t = e.target, num = v => v === '' ? null : Math.max(0, parseInt(v, 10) || 0);
+  if(t.matches('[data-prog]')){ it.prog = num(t.value); if(it.total && it.prog >= it.total && it.status !== 'hecho'){ it.prog = it.total; it.status = 'hecho'; it.doneAt = Date.now(); toast('¡Completado! 🎉'); } saveItem(it); s.draw(); }
+  else if(t.matches('[data-total]')){ it.total = num(t.value); saveItem(it); s.draw(); }
+  else if(t.matches('[data-season]')){ it.season = num(t.value); saveItem(it); }
+  else if(t.matches('[data-next]')){ it.next = t.value || null; it.nextManual = !!t.value; if(!t.value) it.nextLabel = ''; saveItem(it); }
+}
+
+/* ---- Person sheet ---- */
+function openPerson(src, id){
+  const s = pushSheet(); s.p = null; s.err = ''; s.filter = 'all';
+  const draw = () => {
+    if(s.closed) return;
+    let h = topBar(src==='ol' ? 'Autor/a' : src==='anilist' ? 'Seiyuu / staff' : 'Filmografía');
+    if(s.err){ h += s.err === 'nokey' ? `<div class="banner">Para ver la filmografía hace falta la clave de TMDB. <button data-act="settings">Configurar</button></div>` : `<p class="hint">No se pudo cargar (${esc(s.err)}).</p>`; s.el.innerHTML = h; return; }
+    if(!s.p){ s.el.innerHTML = h + `<div class="thinking"><div class="spin"></div>Cargando…</div>`; return; }
+    const p = s.p;
+    h += `<div class="hero"><div class="cover" style="width:96px;height:96px;border-radius:50%">${p.img?`<img src="${esc(p.img)}" referrerpolicy="no-referrer" alt="" onerror="this.remove()">`:'👤'}</div>
+      <div style="flex:1;min-width:0"><h1>${esc(p.name)}</h1><div class="meta">${esc(p.info||'')}</div><div class="meta" style="margin-top:6px">${p.works.length} títulos · ${p.works.filter(w => items[w.id]).length} en tu lista</div></div></div>`;
+    if(p.bio) h += `<div class="pbio" data-expand>${esc(p.bio)}</div>`;
+    let works = p.works;
+    if(p.filters){
+      const types = [...new Set(works.map(w => w.type))];
+      if(types.length > 1){
+        h += `<div class="chips" style="margin-top:16px"><button class="chip small ${s.filter==='all'?'on':''}" data-pf="all">Todo</button>${['inlist', ...Object.keys(TYPES)].filter(k => k==='inlist' ? works.some(w => items[w.id]) : types.includes(k)).map(k => `<button class="chip small ${s.filter===k?'on':''}" data-pf="${k}">${k==='inlist'?'✓ En mi lista':TYPES[k].emoji+' '+TYPES[k].label}</button>`).join('')}</div>`;
+      }
+      if(s.filter === 'inlist') works = works.filter(w => items[w.id]); else if(s.filter !== 'all') works = works.filter(w => w.type === s.filter);
+    }
+    s.works = p.works;
+    h += `<h2 class="sec">${src==='ol'?'Obras':'Filmografía'}</h2><div class="grid">${works.map(w => pcard(w, 'data-work', [w.year, w.role].filter(Boolean).join(' · '))).join('')}</div>`;
+    if(p.link) h += `<a class="ext" href="${p.link}" target="_blank" rel="noopener">Ver perfil completo ↗</a>`;
+    const st = s.el.scrollTop; s.el.innerHTML = h; s.el.scrollTop = st;
+  };
+  s.draw = draw; draw();
+  loadPerson(src, src==='ol' ? id : +id).then(p => { s.p = p; draw(); }).catch(e => { s.err = e instanceof NoKey ? 'nokey' : e.message; draw(); });
+  s.el.addEventListener('click', e => {
+    if(e.target.closest('[data-expand]')){ e.target.closest('[data-expand]').classList.toggle('open'); return; }
+    const f = e.target.closest('[data-pf]'); if(f){ s.filter = f.dataset.pf; draw(); return; }
+    const w = e.target.closest('[data-work]'); if(w){ const en = s.works.find(x => x.id === w.dataset.work); if(en) openDetail(items[en.id] || en); }
+  });
+}
+
+/* ---- Settings ---- */
+function openSettings(){
+  const s = pushSheet();
+  const draw = () => {
+    const n = Object.keys(items).length;
+    s.el.innerHTML = topBar('Ajustes') + `
+      <span class="lbl">Clave de TMDB (dramas, series, películas y actores)</span>
+      <input class="field" data-key placeholder="Pega aquí tu clave" value="${esc(settings.tmdbKey||'')}" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <div class="btnrow" style="margin-top:8px"><button class="btn pri" data-savekey>Guardar y probar</button></div>
+      <p class="hint" data-keymsg></p>
+      <details style="margin-top:10px"><summary style="font-size:14px;font-weight:600;cursor:pointer">¿Cómo consigo la clave? (gratis, 3 minutos)</summary>
+        <ol class="steps">
+          <li>Crea una cuenta en <a href="https://www.themoviedb.org/signup" target="_blank" rel="noopener">themoviedb.org</a> y confirma el email.</li>
+          <li>Ve a <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">Ajustes → API</a> y pulsa <b>Crear / Solicitar clave</b>.</li>
+          <li>Elige uso <b>personal</b>, rellena el formulario (puedes poner "app personal para mi lista" y cualquier web, p. ej. la de tu app).</li>
+          <li>Copia la <b>Clave de la API</b> (o el token de lectura) y pégala aquí.</li>
+        </ol>
+      </details>
+      <h2 class="sec">Copia de seguridad</h2>
+      <p class="hint" style="margin-top:0">Tu lista (${n} título${n===1?'':'s'}) se guarda en este dispositivo. Haz copias de vez en cuando y guárdalas en Archivos o iCloud.</p>
+      <div class="btnrow" style="margin-top:10px"><button class="btn sec" data-export>⬇️ Exportar</button><button class="btn sec" data-import>⬆️ Importar</button></div>
+      <h2 class="sec">Datos</h2>
+      <p class="hint" style="margin-top:0">Datos de <a href="https://anilist.co" target="_blank" rel="noopener">AniList</a>, <a href="https://www.themoviedb.org" target="_blank" rel="noopener">TMDB</a> y <a href="https://openlibrary.org" target="_blank" rel="noopener">Open Library</a>. Este producto usa la API de TMDB pero no está avalado ni certificado por TMDB.</p>
+      <button class="btn del" style="width:100%;margin-top:18px" data-wipe>Borrar toda la lista</button>`;
+  };
+  draw();
+  s.el.addEventListener('click', async e => {
+    if(e.target.closest('[data-savekey]')){
+      const msg = s.el.querySelector('[data-keymsg]');
+      settings.tmdbKey = s.el.querySelector('[data-key]').value.trim(); saveSettings();
+      if(!settings.tmdbKey){ msg.textContent = 'Clave borrada.'; render(); return; }
+      msg.textContent = 'Comprobando…';
+      try{ await tmdb('/configuration', {}, null); msg.innerHTML = '✅ ¡Funciona! Ya puedes buscar dramas, series y películas.'; sugg.state = 'idle'; }
+      catch(err){ msg.textContent = '❌ ' + (err.message.includes('válida') ? 'La clave no es válida. Revisa que la has copiado entera.' : 'No se pudo comprobar: ' + err.message); }
+      render(); return;
+    }
+    if(e.target.closest('[data-export]')){ exportData(); return; }
+    if(e.target.closest('[data-import]')){ $('importFile').click(); return; }
+    const w = e.target.closest('[data-wipe]');
+    if(w){ if(!w.dataset.confirm){ w.dataset.confirm = '1'; w.textContent = '¿Seguro? Toca otra vez para borrar todo'; return; } items = {}; persist(); render(); draw(); toast('Lista borrada'); }
+  });
+}
+async function exportData(){
+  const data = JSON.stringify({app:'milista', version:2, exportedAt:new Date().toISOString(), items}, null, 1);
+  const name = `mi-lista-${todayStr()}.json`;
+  const file = new File([data], name, {type:'application/json'});
+  try{
+    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:'Copia de Mi Lista'}); return; }
+  }catch(e){ if(e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+$('importFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if(!f) return;
+  try{
+    const j = JSON.parse(await f.text());
+    const inc = j.items || j;
+    let n = 0;
+    Object.values(inc).forEach(it => {
+      if(!it || !it.id || !it.title) return;
+      if(!TYPES[it.type]) it.type = 'serie';
+      if(!STATUS[it.status]) it.status = 'pend';
+      if(it.rating && it.rating <= 5 && !j.version) it.rating = it.rating * 2;
+      const cur = items[it.id];
+      if(!cur || (it.updated||0) > (cur.updated||0)){ items[it.id] = it; n++; }
+    });
+    persist(); render(); toast(`${n} título${n===1?'':'s'} importado${n===1?'':'s'}`);
+  }catch(err){ toast('Ese archivo no es una copia válida'); }
+});
+
+/* =============== Navigation & events =============== */
+const VIEW_TXT = {
+  lista:['Mi Lista','Manga, anime, dramas, series, libros y películas'],
+  prox:['Próximos','Nuevos episodios y estrenos de lo que sigues'],
+  parati:['Para ti','Sugerencias según tus notas'],
+  stats:['Estadísticas','Tu resumen de lo que ves y lees']
+};
+function setView(v){
+  view = v;
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-'+v));
+  document.querySelectorAll('.tabbar button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
+  $('hTitle').textContent = VIEW_TXT[v][0]; $('hSub').textContent = VIEW_TXT[v][1];
+  try{ history.replaceState(null, '', '#' + v); }catch(e){}
+  window.scrollTo(0, 0);
+  render();
+}
+document.querySelectorAll('.tabbar button').forEach(b => b.onclick = () => setView(b.dataset.view));
+$('fab').onclick = openSearch;
+$('setBtn').onclick = openSettings;
+
+document.addEventListener('click', e => {
+  if(e.target.closest('.sheet')){ // settings link inside sheets
+    if(e.target.closest('[data-act="settings"]')) openSettings();
+    return;
+  }
+  const act = e.target.closest('[data-act]');
+  if(act){ const a = act.dataset.act; if(a==='settings') openSettings(); else if(a==='refresh') refreshUpcoming(true); else if(a==='resugg'){ sugg.state = 'idle'; buildSuggestions(); } return; }
+  const c = e.target.closest('[data-t]'); if(c){ fType = c.dataset.t; fCountry = 'all'; render(); return; }
+  const cc = e.target.closest('[data-c]'); if(cc){ fCountry = cc.dataset.c; render(); return; }
+  const s = e.target.closest('[data-s]'); if(s){ fStatus = s.dataset.s; render(); return; }
+  const sf = e.target.closest('[data-sf]'); if(sf){ sugg.fType = sf.dataset.sf; sugg.userViewed = true; renderParati(); return; }
+  const p = e.target.closest('[data-plus]');
+  if(p){
+    const it = items[p.dataset.plus]; if(!it) return;
+    it.prog = (it.prog || 0) + 1;
+    if(it.status === 'pend' || it.status === 'pausa') it.status = 'curso';
+    if(it.total && it.prog >= it.total){ it.prog = it.total; it.status = 'hecho'; it.doneAt = Date.now(); toast('¡Completado! 🎉'); }
+    saveItem(it); return;
+  }
+  const sa = e.target.closest('[data-sugadd]');
+  if(sa){ const sg = sugg.list.find(x => x.entry.id === sa.dataset.sugadd); if(sg){ addEntry(sg.entry, 'pend'); sugg.userViewed = true; toast('Añadido a Pendientes ✓'); } return; }
+  const sg = e.target.closest('[data-sug]'); if(sg){ const x = sugg.list.find(y => y.entry.id === sg.dataset.sug); if(x){ sugg.userViewed = true; openDetail(x.entry); } return; }
+  const o = e.target.closest('[data-open]'); if(o && items[o.dataset.open]) openDetail(items[o.dataset.open]);
+});
+$('q').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); render(); });
+$('sortSel').addEventListener('change', e => { sortBy = e.target.value; render(); });
+
+/* =============== Start =============== */
+const h0 = (location.hash || '').slice(1);
+setView(VIEW_TXT[h0] ? h0 : 'lista');
+if(Object.keys(items).length && Date.now() - (settings.lastRefresh||0) > 6*3600*1000) setTimeout(() => refreshUpcoming(false), 1200);
+</script>
+</body>
+</html>
