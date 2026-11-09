@@ -163,6 +163,22 @@ h2.sec{font-size:13px;font-weight:700;margin:22px 0 10px;color:var(--mut);text-t
 .pbio.open{-webkit-line-clamp:unset}
 .steps{padding-left:20px;margin:8px 0;font-size:14px;line-height:1.6;color:#cfd3dc}
 .ext{display:inline-block;margin-top:16px;font-size:13px;color:var(--mut)}
+.eps{display:flex;flex-direction:column;gap:6px}
+.ep{background:var(--bg);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ep.future{opacity:.55}
+.ep-main{display:flex;align-items:center;gap:10px;padding:9px 10px;cursor:pointer}
+.ep .epn{flex:none;width:30px;height:30px;border-radius:9px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:var(--mut)}
+.ep.seen .epn{background:rgba(52,211,153,.18);color:#34d399}
+.ep .info b{display:block;font-size:14px;font-weight:600;line-height:1.3}
+.ep .info small{display:block;font-size:12px;color:var(--mut);margin-top:2px}
+.seenb{flex:none;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);color:var(--mut);font-weight:800}
+.seenb.on{background:#34d399;border-color:#34d399;color:#0f1115}
+.ep-more{padding:0 12px 12px 50px;font-size:13.5px;line-height:1.5;color:#cfd3dc}
+.ep-more img{width:100%;max-width:340px;border-radius:10px;margin-bottom:8px}
+.ep-more p{margin:0}
+.titles{margin:2px 0 8px;font-size:13px;color:var(--mut);line-height:1.45}
+.titles span{display:inline-block;min-width:22px}
+.reasons{font-size:12px;color:var(--mut);margin-top:4px;line-height:1.35}
 </style>
 </head>
 <body>
@@ -262,14 +278,46 @@ function daysUntil(s){ const [y,m,d] = s.split('-').map(Number); const t = new D
 function relDay(n){ return n===0?'Hoy':n===1?'Mañana':n===-1?'Ayer':n>0?`en ${n} días`:`hace ${-n} días`; }
 function fmtDate(s){ const [y,m,d] = s.split('-').map(Number); return `${d} ${MONTHS[m-1]}${y!==new Date().getFullYear()?' '+y:''}`; }
 const fmtScore = s => s ? (Math.round(s*10)/10).toFixed(1) : '';
-function pct(it){ return it.total > 0 ? Math.min(100, Math.round((it.prog||0) / it.total * 100)) : (it.status==='hecho'?100:0); }
+function seasonInfo(it){
+  const se = it.seasonEps; if(!se || Object.keys(se).length < 2) return null;
+  const s = it.season || 1;
+  const prev = Object.entries(se).filter(([k]) => +k < s).reduce((a,[,v]) => a + (v||0), 0);
+  const all = Object.values(se).reduce((a,v) => a + (v||0), 0);
+  return {s, cur: se[s] || null, prev, all, last: Math.max(...Object.keys(se).map(Number))};
+}
+function watchedCount(it){ const si = seasonInfo(it); return si ? si.prev + (it.prog||0) : (it.prog||0); }
+function capOf(it){ const si = seasonInfo(it); return si ? si.cur : it.total; }
+function isLastSeason(it){ const si = seasonInfo(it); return !si || (it.season||1) >= si.last; }
+function checkDone(it){
+  const cap = capOf(it);
+  if(cap && it.prog > cap) it.prog = cap;
+  if(it.prog > 0 && (it.status==='pend' || it.status==='pausa')) it.status = 'curso';
+  if(cap && it.prog >= cap && isLastSeason(it) && it.status !== 'hecho'){ it.status = 'hecho'; it.doneAt = Date.now(); toast('¡Completado! 🎉'); }
+}
+function advance(it, d){
+  const si = seasonInfo(it);
+  let p = (it.prog||0) + d;
+  if(si){
+    if(si.cur && p > si.cur && it.seasonEps[si.s+1]){ it.season = si.s + 1; p = 1; toast(`Empiezas la temporada ${it.season}`); }
+    else if(p < 0 && it.seasonEps[si.s-1]){ it.season = si.s - 1; p = it.seasonEps[it.season]; }
+  }
+  it.prog = Math.max(0, p);
+  checkDone(it);
+}
+function pct(it){
+  const si = seasonInfo(it);
+  if(si && si.all) return Math.min(100, Math.round(watchedCount(it) / si.all * 100));
+  return it.total > 0 ? Math.min(100, Math.round((it.prog||0) / it.total * 100)) : (it.status==='hecho'?100:0);
+}
 function progText(it){
   const T = TYPES[it.type];
   if(!T.unit) return it.status==='hecho' ? 'Vista' : '';
   let s = '';
-  if((it.type==='serie'||it.type==='drama') && it.season) s += `T${it.season} · `;
+  const si = seasonInfo(it);
+  if(si || ((it.type==='serie'||it.type==='drama') && it.season)) s += `T${it.season||1} · `;
   s += `${T.short} ${it.prog||0}`;
-  if(it.total) s += ` / ${it.total}`;
+  const cap = capOf(it);
+  if(cap) s += ` / ${cap}`;
   return s;
 }
 function letterBox(e){ return `<span>${esc((String(e.title||'?').trim()[0]||'?').toUpperCase())}</span>`; }
@@ -325,6 +373,33 @@ function bestTitle(d, isTV){ // from a details response with translations append
   const altBy = cs => alts.filter(a => cs.includes(a.iso_3166_1)).map(a => a.title).find(t => isLatin(t) && /[a-z]/i.test(t));
   return byLang('es') || byLang('en') || altBy(['ES','MX','US','GB']) || tr.map(x => x.data?.[f]).find(isLatin) || altBy(alts.map(a => a.iso_3166_1)) || d[f] || d['original_' + f];
 }
+function tmdbTitles(d, isTV){
+  const f = isTV ? 'name' : 'title', of = 'original_' + f;
+  const tr = d.translations?.translations || [];
+  const trn = (l, r) => tr.find(x => x.iso_639_1 === l && (!r || x.iso_3166_1 === r) && x.data?.[f])?.data[f];
+  const alts = d.alternative_titles?.results || d.alternative_titles?.titles || [];
+  const altBy = cs => alts.filter(a => cs.includes(a.iso_3166_1)).map(a => a.title).find(t => isLatin(t) && /[a-z]/i.test(t));
+  let es = trn('es', 'ES') || trn('es') || (isLatin(d[f]) && d[f] !== d[of] ? d[f] : null) || altBy(['ES','MX']);
+  if(!es && d.original_language === 'es') es = d[of];
+  let en = trn('en', 'US') || trn('en') || altBy(['US','GB']);
+  if(!en && d.original_language === 'en') en = d[of];
+  return {es: es || null, en: en || null, orig: d[of] || null};
+}
+const TITLE_LABELS = {es:'🇪🇸 Español', en:'🇬🇧 Inglés', ro:'🔤 Romaji', orig:'🌏 Original'};
+function titleOptions(t){ // unique, non-empty titles in display order
+  if(!t) return [];
+  const seen = new Set(), out = [];
+  ['es','en','ro','orig'].forEach(k => { const v = t[k]; if(v && !seen.has(v)){ seen.add(v); out.push([k, v]); } });
+  return out;
+}
+function applyTitlePref(it){
+  const p = it.titlePref || settings.titleLang || 'auto';
+  if(p === 'auto' || p === 'custom' || !it.titles) return false;
+  const order = {es:['es','en','ro'], en:['en','es','ro'], ro:['ro','en','es'], orig:['orig']}[p] || [];
+  const v = order.map(k => it.titles[k]).find(Boolean);
+  if(v && v !== it.title){ if(!it.orig) it.orig = it.titles.orig || ''; it.title = v; return true; }
+  return false;
+}
 function bestOverview(d){
   if(d.overview) return d.overview;
   const tr = d.translations?.translations || [];
@@ -351,21 +426,26 @@ async function ol(path){
 }
 
 /* ---- normalizers: every title becomes an "entry" ---- */
-const AL_F = `fragment F on Media{id type format title{userPreferred romaji english native} coverImage{large} startDate{year} episodes chapters status averageScore countryOfOrigin genres nextAiringEpisode{airingAt episode}}`;
+const AL_F = `fragment F on Media{id idMal type format title{userPreferred romaji english native} coverImage{large} startDate{year} episodes chapters status averageScore countryOfOrigin genres nextAiringEpisode{airingAt episode}}`;
 function normAL(m){
   const type = m.type === 'ANIME' ? 'anime' : 'manga';
   const e = {
     id:`al:${m.type}:${m.id}`, src:'anilist', srcId:m.id, mediaType:m.type, type,
     title: m.title?.userPreferred || m.title?.romaji || m.title?.english || '?',
+    titles: {ro: m.title?.romaji || m.title?.userPreferred || null, en: m.title?.english || null, orig: m.title?.native || null},
     orig: m.title?.native || '', alt: m.title?.english && m.title.english !== m.title.userPreferred ? m.title.english : '',
     year: m.startDate?.year || null, country: m.countryOfOrigin || '', poster: m.coverImage?.large || '',
     score: m.averageScore ? m.averageScore/10 : null, genres: m.genres || [],
     total: (type==='anime' ? m.episodes : m.chapters) || null, mstatus: m.status || '',
-    format: m.format || ''
+    format: m.format || '', malId: m.idMal || null
   };
   if(m.nextAiringEpisode){ e.next = ymd(new Date(m.nextAiringEpisode.airingAt*1000)); e.nextLabel = `Ep. ${m.nextAiringEpisode.episode}`; }
   else if(m.status === 'FINISHED'){ e.next = null; }
   return e;
+}
+function seasonEpsOf(d){
+  const o = {}; (d.seasons||[]).filter(x => x.season_number > 0 && x.episode_count > 0).forEach(x => o[x.season_number] = x.episode_count);
+  return Object.keys(o).length ? o : null;
 }
 function classifyTV(t){
   const gs = t.genre_ids || (t.genres||[]).map(g => g.id);
@@ -459,13 +539,14 @@ async function loadDetails(e){
     const d = await tmdbL(`/${e.mediaType}/${e.srcId}`, {append_to_response: isTV ? 'aggregate_credits,recommendations,translations,alternative_titles' : 'credits,recommendations,release_dates,translations,alternative_titles'});
     let overview = d.overview;
     overview = bestOverview(d);
-    const base = normTMDB(d, e.mediaType); base.title = bestTitle(d, isTV);
+    const base = normTMDB(d, e.mediaType); base.title = bestTitle(d, isTV); base.titles = tmdbTitles(d, isTV);
     const credits = isTV ? d.aggregate_credits : d.credits;
     const cast = (credits?.cast||[]).slice(0,18).map(c => ({src:'tmdb', id:c.id, name:c.name, role: isTV ? (c.roles?.[0]?.character||'') : (c.character||''), img:c.profile_path ? TMDB_IMG+'w185'+c.profile_path : ''}));
     try{ await latinizePeople(cast); }catch(_){}
     const meta = {
       ...base, overview, genres:(d.genres||[]).map(g => g.name),
       total: isTV ? (d.number_of_episodes||null) : null, seasons: isTV ? d.number_of_seasons : null,
+      seasonEps: isTV ? seasonEpsOf(d) : null,
       mstatus: d.status, runtime: d.runtime || (d.episode_run_time||[])[0] || null,
       network: isTV ? (d.networks||[]).map(n => n.name).slice(0,2).join(', ') : '',
       next: null, nextLabel: ''
@@ -666,8 +747,8 @@ async function refreshUpcoming(manual){
       await runLimited(tv, 4, async it => {
         const d = await tmdb(`/${it.mediaType}/${it.srcId}`, {append_to_response:'translations,alternative_titles'});
         const n = normTMDB(d, it.mediaType);
-        n.mstatus = d.status; n.title = bestTitle(d, it.mediaType === 'tv');
-        if(it.mediaType==='tv'){ n.total = d.number_of_episodes || null; n.seasons = d.number_of_seasons; const ne = d.next_episode_to_air; n.next = ne ? ne.air_date : null; n.nextLabel = ne ? `T${ne.season_number} E${ne.episode_number}` : ''; }
+        n.mstatus = d.status; n.title = bestTitle(d, it.mediaType === 'tv'); n.titles = tmdbTitles(d, it.mediaType === 'tv');
+        if(it.mediaType==='tv'){ n.total = d.number_of_episodes || null; n.seasons = d.number_of_seasons; n.seasonEps = seasonEpsOf(d); const ne = d.next_episode_to_air; n.next = ne ? ne.air_date : null; n.nextLabel = ne ? `T${ne.season_number} E${ne.episode_number}` : ''; }
         else { n.next = d.release_date && d.release_date >= today ? d.release_date : null; n.nextLabel = n.next ? 'Estreno' : ''; }
         if(applyMeta(items[it.id], n)) changed++;
       });
@@ -681,9 +762,10 @@ function applyMeta(it, n){ // copy fresh public data into a saved item; returns 
   if(!it || !n) return false;
   let ch = false;
   if(!it.customTitle && !isLatin(it.title) && isLatin(n.title)){ it.orig = it.orig || it.title; it.title = n.title; ch = true; }
-  ['poster','score','total','seasons','mstatus','country','orig','genres'].forEach(k => {
+  ['poster','score','total','seasons','seasonEps','malId','mstatus','country','orig','genres','titles'].forEach(k => {
     if(n[k] !== undefined && n[k] !== null && n[k] !== '' && JSON.stringify(n[k]) !== JSON.stringify(it[k])){ it[k] = n[k]; ch = true; }
   });
+  if(applyTitlePref(it)) ch = true;
   if('next' in n){
     const keepManual = it.nextManual && it.next && it.next >= todayStr();
     if(!keepManual && (n.next||null) !== (it.next||null)){ it.next = n.next || null; it.nextLabel = n.nextLabel || ''; it.nextManual = false; ch = true; }
@@ -691,14 +773,145 @@ function applyMeta(it, n){ // copy fresh public data into a saved item; returns 
   return ch;
 }
 
+/* ---- Para ti: by list profile (genres, themes, actors, countries) ---- */
+let smode = 'lista';
+let sugg2 = {state:'idle', list:[], fType:'all', sig:'', userViewed:false};
+const PC_KEY = 'milista2_pcache';
+let pcache = lsGet(PC_KEY, {});
+function modeChips(){
+  return `<div class="chips"><button class="chip ${smode==='lista'?'on':''}" data-smode="lista">🧭 Según tu lista</button><button class="chip ${smode==='notas'?'on':''}" data-smode="notas">⭐ Según tus notas</button></div>`;
+}
+function itemWeight(it){
+  if(it.status === 'aband') return -1.5;
+  if(it.rating){ if(it.rating <= 4) return -1; return Math.max(0.6, (it.rating - 4) / 2); }
+  return (it.status === 'hecho' || it.status === 'curso') ? 1 : 0.6;
+}
+async function profileData(it){
+  if(pcache[it.id]) return pcache[it.id];
+  let p = null;
+  if(it.src === 'tmdb'){
+    const isTV = it.mediaType === 'tv';
+    const d = await tmdb(`/${it.mediaType}/${it.srcId}`, {append_to_response: isTV ? 'keywords,aggregate_credits' : 'keywords,credits'});
+    const kw = (isTV ? d.keywords?.results : d.keywords?.keywords) || [];
+    const cast = ((isTV ? d.aggregate_credits?.cast : d.credits?.cast) || []).slice(0, 8);
+    p = {g:(d.genres||[]).map(x => [x.id, x.name]), k:kw.slice(0, 15).map(x => [x.id, x.name]), c:cast.map(x => [x.id, x.name]),
+         co:(d.origin_country||[])[0] || d.production_countries?.[0]?.iso_3166_1 || ''};
+  } else if(it.src === 'anilist'){
+    const d = await anilist(`query($id:Int){Media(id:$id){genres countryOfOrigin tags{name rank isMediaSpoiler}}}`, {id:it.srcId});
+    p = {g:d.Media.genres || [], t:(d.Media.tags||[]).filter(t => t.rank >= 60 && !t.isMediaSpoiler).slice(0, 8).map(t => t.name), co:d.Media.countryOfOrigin || ''};
+  }
+  if(p){ pcache[it.id] = p; lsSet(PC_KEY, pcache); }
+  return p;
+}
+const topOf = (o, n, min) => Object.entries(o).filter(([, v]) => v >= min).sort((a, b) => b[1] - a[1]).slice(0, n);
+async function buildProfileSuggestions(){
+  sugg2.state = 'loading'; sugg2.userViewed = false; if(view === 'parati') renderParati();
+  const all = Object.values(items).filter(i => i.src === 'anilist' || (i.src === 'tmdb' && settings.tmdbKey));
+  const pos = all.filter(i => itemWeight(i) > 0).sort((a, b) => itemWeight(b) - itemWeight(a) || (b.updated||0) - (a.updated||0)).slice(0, 30);
+  const neg = all.filter(i => itemWeight(i) < 0).slice(0, 12);
+  if(!pos.length){ sugg2.state = 'empty'; if(view === 'parati') renderParati(); return; }
+  const P = {tg:{}, tgn:{}, tk:{}, tkn:{}, ta:{}, tan:{}, taN:{}, tco:{}, ag:{}, at:{}, tv:0, movie:0, anime:0, manga:0};
+  await runLimited([...pos, ...neg], 4, async it => {
+    const p = await profileData(it); if(!p) return;
+    const w = itemWeight(it), good = w > 0;
+    if(it.src === 'tmdb'){
+      if(good) P[it.mediaType === 'tv' ? 'tv' : 'movie']++;
+      p.g.forEach(([id, n]) => { P.tg[id] = (P.tg[id]||0) + w; P.tgn[id] = n; });
+      p.k.forEach(([id, n]) => { P.tk[id] = (P.tk[id]||0) + w; P.tkn[id] = n; });
+      p.c.forEach(([id, n]) => { P.ta[id] = (P.ta[id]||0) + w; P.tan[id] = n; if(good) P.taN[id] = (P.taN[id]||0) + 1; });
+      if(p.co) P.tco[p.co] = (P.tco[p.co]||0) + w;
+    } else {
+      if(good) P[it.mediaType === 'ANIME' ? 'anime' : 'manga']++;
+      p.g.forEach(g => P.ag[g] = (P.ag[g]||0) + w);
+      (p.t||[]).forEach(t => P.at[t] = (P.at[t]||0) + w);
+    }
+  });
+  const pool = new Map();
+  const addC = (e, score, reason) => {
+    if(!e || items[e.id]) return;
+    const c = pool.get(e.id) || {entry:e, score:0, reasons:[]};
+    c.score += score; if(reason && !c.reasons.includes(reason)) c.reasons.push(reason);
+    pool.set(e.id, c);
+  };
+  const jobs = [];
+  if(settings.tmdbKey && (P.tv || P.movie)){
+    const countries = topOf(P.tco, 3, 0.5).map(x => x[0]);
+    const genres = topOf(P.tg, 3, 0.5).map(x => x[0]).filter(g => !TV_SKIP_GENRES.includes(+g) && g !== '16');
+    const kws = topOf(P.tk, 6, 1).map(x => x[0]);
+    const badG = Object.entries(P.tg).filter(([, v]) => v < 0).map(([k]) => k);
+    const without = [...new Set([...badG, ...TV_SKIP_GENRES.map(String), ...(P.anime ? ['16'] : [])])].join(',');
+    const gName = genres.map(g => P.tgn[g]).filter(Boolean).slice(0, 2).join(', ');
+    const kName = kws.slice(0, 3).map(k => P.tkn[k]).filter(Boolean).join(', ');
+    if(P.tv){
+      (countries.length ? countries : [null]).forEach(co => {
+        const base = {sort_by:'vote_average.desc', 'vote_count.gte':20, without_genres:without};
+        if(co) base.with_origin_country = co;
+        const where = co ? ` · ${flag(co)} ${COUNTRY_NAMES[co]||co}` : '';
+        if(kws.length) jobs.push(tmdbL('/discover/tv', {...base, with_keywords:kws.join('|')}).then(d => d.results.forEach((r, i) => addC(normTMDB(r, 'tv'), 3 * (1 - i/25), `Temas: ${kName}${where}`))));
+        if(genres.length) jobs.push(tmdbL('/discover/tv', {...base, with_genres:genres.join('|')}).then(d => d.results.forEach((r, i) => addC(normTMDB(r, 'tv'), 2 * (1 - i/25), `Géneros: ${gName}${where}`))));
+        jobs.push(tmdbL('/discover/tv', {...base, sort_by:'popularity.desc', 'first_air_date.gte':`${new Date().getFullYear()-1}-01-01`, with_genres:genres.join('|') || undefined}).then(d => d.results.forEach((r, i) => addC(normTMDB(r, 'tv'), 1.2 * (1 - i/25), `Reciente y popular${where}`))));
+      });
+    }
+    if(P.movie){
+      const mg = genres.filter(g => !['10759','10765','10768','10762','10766'].includes(g));
+      jobs.push(tmdbL('/discover/movie', {sort_by:'vote_average.desc', 'vote_count.gte':80, with_genres:mg.join('|') || undefined, with_origin_country:countries[0], without_genres:badG.join(',') || undefined}).then(d => d.results.forEach((r, i) => addC(normTMDB(r, 'movie'), 1.8 * (1 - i/25), `Películas de ${gName || 'tu estilo'}`))));
+    }
+    const actors = Object.entries(P.taN).filter(([id, n]) => n >= 2 && P.ta[id] > 0).sort((a, b) => P.ta[b[0]] - P.ta[a[0]]).slice(0, 6);
+    actors.forEach(([id, n]) => jobs.push(tmdbL(`/person/${id}/combined_credits`).then(d => {
+      const raw = P.tan[id]; const name = isLatin(raw) ? raw : (pnames[id] || raw);
+      (d.cast||[]).filter(c => (c.media_type === 'tv' || c.media_type === 'movie') && !(c.genre_ids||[]).some(g => TV_SKIP_GENRES.includes(g)) && (c.vote_count||0) >= 3 && (c.media_type !== 'tv' || (c.episode_count||0) >= 4))
+        .forEach(c => addC(normTMDB(c, c.media_type), 2.4 + 0.4 * n, `Sale ${name} (está en ${n} de tu lista)`));
+    })));
+  }
+  if(P.anime || P.manga){
+    const ag = topOf(P.ag, 3, 0.5).map(x => x[0]), at = topOf(P.at, 3, 0.8).map(x => x[0]);
+    const badAG = Object.entries(P.ag).filter(([, v]) => v < 0).map(([k]) => k);
+    const types = [P.anime ? 'ANIME' : null, P.manga ? 'MANGA' : null].filter(Boolean);
+    types.forEach(t => {
+      ag.forEach(g => jobs.push(anilist(`query($g:String,$t:MediaType,$no:[String]){Page(perPage:25){media(genre:$g,type:$t,sort:[SCORE_DESC],isAdult:false,genre_not_in:$no,popularity_greater:5000){...F}}} ${AL_F}`, {g, t, no:badAG})
+        .then(d => d.Page.media.forEach((m, i) => addC(normAL(m), 1.5 * (1 - i/30), `Género: ${g}`)))));
+      at.forEach(tag => jobs.push(anilist(`query($tag:String,$t:MediaType,$no:[String]){Page(perPage:25){media(tag:$tag,type:$t,sort:[SCORE_DESC],isAdult:false,genre_not_in:$no,popularity_greater:3000){...F}}} ${AL_F}`, {tag, t, no:badAG})
+        .then(d => d.Page.media.forEach((m, i) => addC(normAL(m), 2 * (1 - i/30), `Tema: ${tag}`)))));
+    });
+  }
+  await Promise.all(jobs.map(j => j.catch(() => {})));
+  sugg2.list = [...pool.values()].sort((a, b) => b.score - a.score || (b.entry.score||0) - (a.entry.score||0));
+  sugg2.state = sugg2.list.length ? 'done' : 'none';
+  if(view === 'parati') renderParati();
+}
+function perfilSig(){ return Object.values(items).map(i => i.id + i.status + (i.rating||0)).sort().join('|'); }
+function renderPerfil(){
+  const sig = perfilSig();
+  if(sugg2.state === 'idle' || (sugg2.state !== 'loading' && sugg2.sig !== sig && !sugg2.userViewed)){ sugg2.sig = sig; buildProfileSuggestions(); }
+  let h = modeChips();
+  if(sugg2.state === 'loading'){ $('paratiBody').innerHTML = h + `<div class="thinking"><div class="spin"></div>Analizando géneros, temas, actores y países de tu lista…</div>`; return; }
+  if(sugg2.state === 'empty'){ $('paratiBody').innerHTML = h + `<div class="empty"><div>🧭</div>Añade a tu lista cosas que estés viendo o que quieras ver, y te sugeriré otras parecidas.<br>Lo que marques como <b>Abandonado</b> se usa para saber qué <b>no</b> te gusta.</div>`; return; }
+  h += `<div class="chips">${typeChipsHTML(sugg2.fType, 'sf2')}</div>`;
+  const list = sugg2.list.filter(x => !items[x.entry.id] && (sugg2.fType === 'all' || x.entry.type === sugg2.fType));
+  h += `<p class="hint" style="margin-top:0">Según lo que tienes en tu lista. Lo abandonado y lo que puntúas bajo cuenta como "no me gusta".</p>`;
+  if(!list.length) h += `<div class="empty"><div>🤷</div>No hay sugerencias de este tipo todavía.</div>`;
+  else h += `<div class="list">${list.slice(0, 50).map(x => {
+      const e = x.entry, T = TYPES[e.type];
+      return `<div class="item" data-sug2="${esc(e.id)}">${coverHTML(e)}
+        <div class="info"><h3>${esc(e.title)}</h3>
+          <div class="meta"><span class="badge" style="color:${T.color}">${T.emoji} ${T.label}</span>${e.country?`<span>${flag(e.country)}</span>`:''}${e.year?`<span>${e.year}</span>`:''}${e.score?`<span>★ ${fmtScore(e.score)}</span>`:''}</div>
+          <div class="reasons">${x.reasons.slice(0, 2).map(r => esc(r)).join('<br>')}</div>
+        </div>
+        <button class="plus" data-sugadd2="${esc(e.id)}" aria-label="Añadir">＋</button></div>`;
+    }).join('')}</div>`;
+  h += `<button class="wide" data-act="resugg2" style="margin-top:14px">🔄 Recalcular sugerencias</button>`;
+  $('paratiBody').innerHTML = h;
+}
+
 /* ---- Para ti (suggestions) ---- */
 let sugg = {state:'idle', list:[], basis:'', fType:'all', sig:''};
 function suggSignature(){ return Object.values(items).filter(i => i.rating).map(i => i.id + i.rating).sort().join('|') + '#' + Object.keys(items).length; }
 function renderParati(){
+  if(smode === 'lista') return renderPerfil();
   if(sugg.state === 'idle' || ((sugg.state === 'done' || sugg.state === 'empty') && sugg.sig !== suggSignature() && !sugg.userViewed)){ buildSuggestions(); }
-  let h = `<div class="chips">${typeChipsHTML(sugg.fType, 'sf')}</div>`;
+  let h = modeChips() + `<div class="chips">${typeChipsHTML(sugg.fType, 'sf')}</div>`;
   if(sugg.state === 'loading'){ $('paratiBody').innerHTML = h + `<div class="thinking"><div class="spin"></div>Buscando recomendaciones a partir de tus notas…</div>`; return; }
-  if(sugg.state === 'empty'){ $('paratiBody').innerHTML = `<div class="empty"><div>✨</div>Pon nota (del 1 al 10) a lo que has visto o leído.<br>Con tus títulos de <b>7 o más</b> te recomendaré cosas parecidas.</div>`; return; }
+  if(sugg.state === 'empty'){ $('paratiBody').innerHTML = modeChips() + `<div class="empty"><div>✨</div>Pon nota (del 1 al 10) a lo que has visto o leído.<br>Con tus títulos de <b>7 o más</b> te recomendaré cosas parecidas.</div>`; return; }
   if(sugg.state === 'error'){ $('paratiBody').innerHTML = h + `<p class="hint">${esc(sugg.err)}</p><button class="wide" data-act="resugg">Reintentar</button>`; return; }
   const list = sugg.list.filter(s => !items[s.entry.id] && (sugg.fType==='all' || s.entry.type===sugg.fType));
   h += `<p class="hint" style="margin-top:0">${sugg.basis === 'rated' ? 'Basado en tus títulos mejor valorados.' : 'Aún no tienes notas altas: basado en lo que estás viendo o has terminado. Pon nota para afinar.'}</p>`;
@@ -769,7 +982,7 @@ function renderStats(){
   const avg = rated.length ? (rated.reduce((s,i) => s+i.rating, 0) / rated.length).toFixed(1) : '–';
   const year = new Date().getFullYear();
   const doneYear = all.filter(i => i.status==='hecho' && i.doneAt && new Date(i.doneAt).getFullYear()===year).length;
-  const sum = t => all.filter(i => i.type===t).reduce((s,i) => s+(i.prog||0), 0);
+  const sum = t => all.filter(i => i.type===t).reduce((s,i) => s+watchedCount(i), 0);
   let h = `<div class="stats">
       <div class="stat"><b>${all.length}</b><span>Títulos</span></div>
       <div class="stat"><b>${doneYear}</b><span>Terminados en ${year}</span></div>
@@ -888,11 +1101,12 @@ function addEntry(e, status){
   const it = {
     id:e.id, src:e.src, srcId:e.srcId, mediaType:e.mediaType, type:e.type, title:e.title, orig:e.orig||'', alt:e.alt||'',
     year:e.year||null, date:e.date||null, country:e.country||'', poster:e.poster||'', score:e.score||null, genres:e.genres||[],
-    total:e.total||null, seasons:e.seasons||null, mstatus:e.mstatus||'', next:e.next||null, nextLabel:e.nextLabel||'',
-    authors:e.authors||null, status, prog:null, season:null, rating:0, notes:'', created:Date.now(), updated:Date.now(), doneAt:null
+    total:e.total||null, seasons:e.seasons||null, seasonEps:e.seasonEps||null, malId:e.malId||null, mstatus:e.mstatus||'', next:e.next||null, nextLabel:e.nextLabel||'',
+    authors:e.authors||null, titles:e.titles||null, status, prog:null, season:null, rating:0, notes:'', created:Date.now(), updated:Date.now(), doneAt:null
   };
   if(status === 'hecho'){ it.doneAt = Date.now(); if(it.total) it.prog = it.total; }
   if((it.type==='drama'||it.type==='serie') && status !== 'pend') it.season = 1;
+  applyTitlePref(it);
   saveItem(it);
   return it;
 }
@@ -918,7 +1132,7 @@ function detailHTML(s){
   const meta = [e.country ? `${flag(e.country)} ${COUNTRY_NAMES[e.country]||e.country}` : '', e.year, e.format && e.src==='anilist' ? e.format.replace('_',' ') : '',
     e.seasons ? `${e.seasons} temporada${e.seasons>1?'s':''}` : '', e.total ? `${e.total} ${T.unit ? T.unit.toLowerCase()+'s' : ''}` : '', e.runtime ? `${e.runtime} min` : '', e.network].filter(Boolean).map(x => esc(x)).join(' · ');
   let h = topBar(`${T.emoji} ${T.label}`) + `<div class="hero">${coverHTML(e)}<div style="flex:1;min-width:0">
-      <h1>${esc(e.title)}</h1>${e.orig && e.orig !== e.title ? `<div class="orig">${esc(e.orig)}</div>`:''}
+      <h1>${esc(it ? it.title : e.title)}</h1>${titleOptions(e.titles).length > 1 ? `<div class="titles">${titleOptions(e.titles).filter(([, v]) => v !== (it ? it.title : e.title)).map(([k, v]) => `<div><span>${TITLE_LABELS[k].split(' ')[1]}:</span> ${esc(v)}</div>`).join('')}</div>` : (e.orig && e.orig !== e.title ? `<div class="orig">${esc(e.orig)}</div>`:'')}
       <div class="meta">${meta}</div>
       ${e.authors?.length ? `<div class="meta" style="margin-top:4px">${esc(e.authors.map(a => a.name).join(', '))}</div>`:''}
       <div class="scores">${e.score ? `<div class="score"><b>${fmtScore(e.score)}</b>${e.src==='tmdb'?'TMDB':e.src==='anilist'?'AniList':'lectores'}</div>`:''}${it?.rating ? `<div class="score me"><b>${it.rating}</b>tu nota</div>`:''}</div>
@@ -927,15 +1141,19 @@ function detailHTML(s){
     const nextVal = it.next || '';
     h += `<div class="track-box">
       <span class="lbl">Estado</span><div class="seg">${Object.entries(STATUS).map(([k,v]) => `<button class="chip small ${it.status===k?'on':''}" data-st="${k}">${v.label}</button>`).join('')}</div>
-      ${T.unit ? `<span class="lbl">${T.unit} por el que vas</span>
+      ${T.unit ? (seasonInfo(it) ? `<span class="lbl">Temporada</span><div class="stepper" style="max-width:240px"><button data-sstep="-1">−</button><input class="field" type="number" inputmode="numeric" min="1" value="${it.season || 1}" data-season><button data-sstep="1">+</button><span class="of">de ${seasonInfo(it).last}</span></div>
+        <span class="lbl">Episodio por el que vas (temporada ${it.season||1})</span>
+        <div class="stepper"><button data-step="-1">−</button><input class="field" type="number" inputmode="numeric" min="0" value="${it.prog ?? ''}" placeholder="0" data-prog><button data-step="1">+</button><span class="of">de ${capOf(it) || '?'}</span></div>
+        <p class="hint">${watchedCount(it)} de ${seasonInfo(it).all} episodios en total</p>` : `<span class="lbl">${T.unit} por el que vas</span>
         <div class="stepper"><button data-step="-1">−</button><input class="field" type="number" inputmode="numeric" min="0" value="${it.prog ?? ''}" placeholder="0" data-prog><button data-step="1">+</button>
         <span class="of">de</span><input class="field" style="max-width:76px;text-align:center" type="number" inputmode="numeric" min="0" value="${it.total ?? ''}" placeholder="?" data-total></div>
-        ${(it.type==='drama'||it.type==='serie') ? `<span class="lbl">Temporada</span><div class="stepper" style="max-width:220px"><button data-sstep="-1">−</button><input class="field" type="number" inputmode="numeric" min="1" value="${it.season ?? ''}" placeholder="1" data-season><button data-sstep="1">+</button></div>` : ''}` : ''}
+        ${(it.type==='drama'||it.type==='serie') ? `<span class="lbl">Temporada</span><div class="stepper" style="max-width:220px"><button data-sstep="-1">−</button><input class="field" type="number" inputmode="numeric" min="1" value="${it.season ?? ''}" placeholder="1" data-season><button data-sstep="1">+</button></div>` : ''}`) : ''}
       <span class="lbl">Tu nota ${it.rating ? `· <b style="color:var(--acc2)">${it.rating}/10</b>` : '(toca para puntuar)'}</span>
       <div class="rate10">${[1,2,3,4,5,6,7,8,9,10].map(n => `<button class="${it.rating===n?'on':''}" data-rate="${n}">${n}</button>`).join('')}</div>
       <span class="lbl">Próximo estreno ${it.nextLabel ? `· ${esc(it.nextLabel)}` : ''}</span>
       <input class="field" type="date" value="${nextVal}" data-next>
-      <span class="lbl">Nombre en tu lista</span><input class="field" data-ctitle value="${esc(it.title)}">
+      ${titleOptions(e.titles || it.titles).length > 1 ? `<span class="lbl">Título que se ve en tu lista</span><div class="seg">${titleOptions(e.titles || it.titles).map(([k]) => `<button class="chip small ${(it.titlePref===k || (!it.titlePref && (e.titles||it.titles)[k]===it.title)) && it.titlePref!=='custom' ? 'on' : ''}" data-tpref="${k}">${TITLE_LABELS[k]}</button>`).join('')}</div>` : ''}
+      <span class="lbl">${titleOptions(e.titles || it.titles).length > 1 ? 'O escribe tu propio nombre' : 'Nombre en tu lista'}</span><input class="field" data-ctitle value="${esc(it.title)}">
       <span class="lbl">Notas</span><textarea class="field" data-notes placeholder="Dónde verlo, opinión…">${esc(it.notes||'')}</textarea>
       <button class="btn del" style="width:100%;margin-top:14px" data-del>🗑 Quitar de mi lista</button>
     </div>`;
@@ -948,6 +1166,7 @@ function detailHTML(s){
   else if(s.err) h += `<p class="hint">No se pudo cargar la ficha (${esc(s.err)}).</p>`;
   if(e.overview) h += `<div class="overview" data-expand>${esc(e.overview)}</div>`;
   if(e.genres?.length) h += `<div class="genres">${e.genres.slice(0,8).map(g => `<span>${esc(g)}</span>`).join('')}</div>`;
+  h += episodesHTML(s);
   if(d?.cast?.length) h += `<h2 class="sec">${d.castTitle}</h2><div class="hscroll">${d.cast.map(p => `<div class="person" data-person="${p.src}:${p.id}"><div class="ph">${p.img?`<img src="${esc(p.img)}" loading="lazy" referrerpolicy="no-referrer" alt="" onerror="this.remove()">`:'👤'}</div><b>${esc(p.name)}</b>${p.role?`<small>${esc(p.role)}</small>`:''}</div>`).join('')}</div>`;
   if(d?.recs?.length){ s.recs = d.recs; h += `<h2 class="sec">Si te gusta, prueba</h2><div class="hscroll">${d.recs.map(r => pcard(r, 'data-rec')).join('')}</div>`; }
   if(d?.link) h += `<a class="ext" href="${d.link}" target="_blank" rel="noopener">Ver en ${e.src==='tmdb'?'TMDB':e.src==='anilist'?'AniList':'Open Library'} ↗</a>`;
@@ -960,16 +1179,19 @@ function pcard(r, attr, sub){
 function detailClick(s, e){
   const t = e.target;
   if(t.closest('[data-expand]')){ t.closest('[data-expand]').classList.toggle('open'); return; }
+  if(episodeClick(s, t)) return;
   const it = items[s.entry.id];
   const add = t.closest('[data-add]'); if(add){ addEntry(s.entry, add.dataset.add); toast('Añadido ✓'); s.draw(); return; }
   const p = t.closest('[data-person]'); if(p){ const i = p.dataset.person.indexOf(':'); openPerson(p.dataset.person.slice(0,i), p.dataset.person.slice(i+1)); return; }
   const r = t.closest('[data-rec]'); if(r){ const en = (s.recs||[]).find(x => x.id === r.dataset.rec); if(en) openDetail(items[en.id] || en); return; }
   if(!it) return;
   const st = t.closest('[data-st]');
-  if(st){ it.status = st.dataset.st; if(it.status==='hecho'){ it.doneAt = it.doneAt || Date.now(); if(it.total && TYPES[it.type].unit) it.prog = it.total; } else it.doneAt = null; if(it.status==='curso' && (it.type==='drama'||it.type==='serie') && !it.season) it.season = 1; saveItem(it); s.draw(); return; }
+  if(st){ it.status = st.dataset.st; if(it.status==='hecho'){ it.doneAt = it.doneAt || Date.now(); const si = seasonInfo(it); if(si){ it.season = si.last; it.prog = it.seasonEps[si.last]; } else if(it.total && TYPES[it.type].unit) it.prog = it.total; } else it.doneAt = null; if(it.status==='curso' && (it.type==='drama'||it.type==='serie') && !it.season) it.season = 1; saveItem(it); s.draw(); return; }
   const step = t.closest('[data-step]');
-  if(step){ it.prog = Math.max(0, (it.prog||0) + (+step.dataset.step)); if(it.prog > 0 && (it.status==='pend'||it.status==='pausa')) it.status = 'curso'; if(it.total && it.prog >= it.total){ it.prog = it.total; if(it.status !== 'hecho'){ it.status = 'hecho'; it.doneAt = Date.now(); toast('¡Completado! 🎉'); } } saveItem(it); s.draw(); return; }
-  const ss = t.closest('[data-sstep]'); if(ss){ it.season = Math.max(1, (it.season||1) + (+ss.dataset.sstep)); saveItem(it); s.draw(); return; }
+  if(step){ advance(it, +step.dataset.step); saveItem(it); if(s.ep) s.ep.season = it.season || 1; s.draw(); return; }
+  const ss = t.closest('[data-sstep]'); if(ss){ const si = seasonInfo(it); let ns = Math.max(1, (it.season||1) + (+ss.dataset.sstep)); if(si) ns = Math.min(ns, si.last); if(ns !== (it.season||1)){ it.season = ns; it.prog = 0; if(s.ep) s.ep.season = ns; } saveItem(it); s.draw(); return; }
+  const tp = t.closest('[data-tpref]');
+  if(tp){ const k = tp.dataset.tpref, ts = s.entry.titles || it.titles; if(ts?.[k]){ it.titles = ts; it.titlePref = k; it.customTitle = false; it.title = ts[k]; if(!it.orig) it.orig = ts.orig || ''; saveItem(it); s.entry.title = it.title; s.draw(); toast('Título cambiado'); } return; }
   const rt = t.closest('[data-rate]'); if(rt){ const n = +rt.dataset.rate; it.rating = it.rating === n ? 0 : n; saveItem(it); s.draw(); return; }
   const del = t.closest('[data-del]');
   if(del){ if(!del.dataset.confirm){ del.dataset.confirm = '1'; del.textContent = '¿Seguro? Toca otra vez para quitar'; return; } removeItem(it.id); toast('Quitado de tu lista'); s.draw(); }
@@ -977,11 +1199,119 @@ function detailClick(s, e){
 function detailChange(s, e){
   const it = items[s.entry.id]; if(!it) return;
   const t = e.target, num = v => v === '' ? null : Math.max(0, parseInt(v, 10) || 0);
-  if(t.matches('[data-prog]')){ it.prog = num(t.value); if(it.total && it.prog >= it.total && it.status !== 'hecho'){ it.prog = it.total; it.status = 'hecho'; it.doneAt = Date.now(); toast('¡Completado! 🎉'); } saveItem(it); s.draw(); }
+  if(t.matches('[data-prog]')){ it.prog = num(t.value) || 0; checkDone(it); saveItem(it); s.draw(); }
   else if(t.matches('[data-total]')){ it.total = num(t.value); saveItem(it); s.draw(); }
-  else if(t.matches('[data-ctitle]')){ const v = t.value.trim(); if(v && v !== it.title){ it.orig = it.orig || it.title; it.title = v; it.customTitle = true; saveItem(it); s.entry.title = v; s.draw(); toast('Nombre cambiado'); } }
-  else if(t.matches('[data-season]')){ it.season = num(t.value); saveItem(it); }
+  else if(t.matches('[data-ctitle]')){ const v = t.value.trim(); if(v && v !== it.title){ it.orig = it.orig || it.title; it.title = v; it.customTitle = true; it.titlePref = 'custom'; saveItem(it); s.entry.title = v; s.draw(); toast('Nombre cambiado'); } }
+  else if(t.matches('[data-season]')){ const si = seasonInfo(it); let ns = Math.max(1, num(t.value) || 1); if(si) ns = Math.min(ns, si.last); it.season = ns; if(s.ep) s.ep.season = ns; saveItem(it); s.draw(); }
   else if(t.matches('[data-next]')){ it.next = t.value || null; it.nextManual = !!t.value; if(!t.value) it.nextLabel = ''; saveItem(it); }
+}
+
+/* ---- Episodes ---- */
+const genericEp = t => !t || /^(episodio|episode|capítulo|cap\.?)\s*\d+$/i.test(String(t).trim()) || !isLatin(t);
+async function loadSeasonEps(id, n){
+  const es = await tmdb(`/tv/${id}/season/${n}`);
+  const eps = (es.episodes||[]).map(e => ({n:e.episode_number, title:e.name||'', ov:e.overview||'', date:e.air_date||'', rt:e.runtime||null, img:e.still_path ? TMDB_IMG+'w300'+e.still_path : ''}));
+  if(eps.some(e => !e.ov || genericEp(e.title))){
+    try{
+      const en = await tmdb(`/tv/${id}/season/${n}`, {}, 'en-US');
+      const m = new Map((en.episodes||[]).map(e => [e.episode_number, e]));
+      eps.forEach(e => { const x = m.get(e.n); if(!x) return; if(genericEp(e.title) && !genericEp(x.name)) e.title = x.name; if(!e.ov && x.overview) e.ov = x.overview; });
+    }catch(_){}
+  }
+  eps.forEach(e => { if(genericEp(e.title)) e.title = ''; });
+  return eps;
+}
+async function jikan(path, retry = 2){
+  const r = await fetch('https://api.jikan.moe/v4' + path);
+  if(r.status === 429 && retry){ await new Promise(ok => setTimeout(ok, 1300)); return jikan(path, retry - 1); }
+  if(!r.ok) throw new Error('Jikan ' + r.status);
+  return r.json();
+}
+async function loadAnimeEps(malId, page){
+  const j = await jikan(`/anime/${malId}/episodes?page=${page}`);
+  return {eps:(j.data||[]).map(e => ({n:e.mal_id, title:e.title || e.title_romanji || '', date:e.aired ? e.aired.slice(0,10) : '', filler:e.filler, recap:e.recap, ov:null})), more:!!j.pagination?.has_next_page};
+}
+function episodesHTML(s){
+  const e = s.entry, it = items[e.id];
+  const tv = e.src === 'tmdb' && e.mediaType === 'tv', an = e.src === 'anilist' && e.mediaType === 'ANIME';
+  if(!tv && !an) return '';
+  if(!s.det && !s.err) return ''; // wait for the ficha
+  if(s.err) return '';
+  const E = s.ep || (s.ep = {season: it?.season || 1, data:{}, open:{}, loading:{}, page:1, more:false});
+  let h = `<h2 class="sec">Episodios</h2>`;
+  let key = 'a';
+  if(tv){
+    const se = e.seasonEps || {};
+    const seasons = Object.keys(se).map(Number).sort((a,b) => a-b);
+    if(!seasons.length) return '';
+    if(!se[E.season]) E.season = seasons.includes(it?.season) ? it.season : seasons[0];
+    if(seasons.length > 1) h += `<div class="chips">${seasons.map(n => `<button class="chip small ${E.season===n?'on':''}" data-eps="${n}">Temporada ${n}</button>`).join('')}</div>`;
+    key = 's' + E.season;
+  }
+  const list = E.data[key];
+  if(!list){ if(!E.loading[key]) loadEps(s, key); return h + `<div class="thinking"><div class="spin"></div>Cargando episodios…</div>`; }
+  if(!list.length) return h + `<p class="hint">No hay información de los episodios.</p>`;
+  const today = todayStr();
+  h += `<div class="eps">` + list.map(ep => {
+    const seen = !!it && (tv ? ((it.season||1) > E.season || ((it.season||1) === E.season && ep.n <= (it.prog||0))) : ep.n <= (it.prog||0));
+    const future = !!ep.date && ep.date > today;
+    const open = E.open[key + ':' + ep.n];
+    const sub = [ep.date ? (future ? 'Se estrena el ' : '') + fmtDate(ep.date) : '', ep.rt ? ep.rt + ' min' : '', ep.filler ? 'relleno' : '', ep.recap ? 'resumen' : ''].filter(Boolean).join(' · ');
+    return `<div class="ep ${seen?'seen':''} ${future?'future':''}">
+      <div class="ep-main" data-epx="${ep.n}"><span class="epn">${ep.n}</span><div class="info"><b>${esc(ep.title || (tv ? `Episodio ${ep.n}` : `Episodio ${ep.n}`))}</b>${sub?`<small>${esc(sub)}</small>`:''}</div>
+      ${future ? '' : `<button class="seenb ${seen?'on':''}" data-seen="${ep.n}" aria-label="Visto hasta aquí">✓</button>`}</div>
+      ${open ? `<div class="ep-more">${ep.img ? `<img src="${esc(ep.img)}" loading="lazy" referrerpolicy="no-referrer" alt="" onerror="this.remove()">` : ''}${ep.ov === null ? '<div class="thinking" style="padding:4px 0"><div class="spin"></div>Cargando…</div>' : `<p>${esc(ep.ov || 'Sin descripción.')}</p>`}</div>` : ''}
+    </div>`;
+  }).join('') + `</div>`;
+  if(an && E.more) h += `<button class="wide" data-epmore ${E.loading.more?'disabled':''}>${E.loading.more?'Cargando…':'Cargar más episodios'}</button>`;
+  h += `<p class="hint">Toca un episodio para ver de qué va. Pulsa ✓ para marcar que lo has visto hasta ahí.</p>`;
+  return h;
+}
+async function loadEps(s, key){
+  const E = s.ep, e = s.entry; E.loading[key] = true;
+  try{
+    if(key[0] === 's') E.data[key] = await loadSeasonEps(e.srcId, +key.slice(1));
+    else {
+      let r = {eps:[], more:false};
+      if(e.malId){ try{ r = await loadAnimeEps(e.malId, 1); }catch(_){} }
+      if(!r.eps.length && e.total) r.eps = Array.from({length:e.total}, (_, i) => ({n:i+1, title:'', date:'', ov:''}));
+      E.data[key] = r.eps; E.more = r.more; E.page = 1;
+    }
+  }catch(err){ E.data[key] = []; }
+  E.loading[key] = false; s.draw();
+}
+function episodeClick(s, t){
+  const E = s.ep; if(!E) return false;
+  const e = s.entry, tv = e.src === 'tmdb';
+  const key = tv ? 's' + E.season : 'a';
+  const sc = t.closest('[data-eps]'); if(sc){ E.season = +sc.dataset.eps; s.draw(); return true; }
+  if(t.closest('[data-epmore]')){
+    if(E.loading.more) return true; E.loading.more = true; s.draw();
+    loadAnimeEps(e.malId, E.page + 1).then(r => { E.page++; E.data.a = (E.data.a||[]).concat(r.eps); E.more = r.more; }).catch(() => { E.more = false; }).finally(() => { E.loading.more = false; s.draw(); });
+    return true;
+  }
+  const sb = t.closest('[data-seen]');
+  if(sb){
+    const n = +sb.dataset.seen;
+    let it = items[e.id];
+    if(!it){ addEntry(e, 'curso'); it = items[e.id]; toast('Añadido a tu lista ✓'); }
+    const sameSpot = (!tv || (it.season||1) === E.season) && (it.prog||0) === n;
+    if(tv) it.season = E.season;
+    it.prog = sameSpot ? n - 1 : n;
+    if(it.status === 'hecho' && sameSpot){ it.status = 'curso'; it.doneAt = null; }
+    checkDone(it); saveItem(it); s.draw(); return true;
+  }
+  const ex = t.closest('[data-epx]');
+  if(ex){
+    const n = +ex.dataset.epx, k = key + ':' + n;
+    E.open[k] = !E.open[k];
+    const ep = (E.data[key]||[]).find(x => x.n === n);
+    if(E.open[k] && ep && ep.ov === null && !tv){
+      jikan(`/anime/${e.malId}/episodes/${n}`).then(j => { ep.ov = j.data?.synopsis || ''; }).catch(() => { ep.ov = ''; }).finally(() => s.draw());
+    }
+    s.draw(); return true;
+  }
+  return false;
 }
 
 /* ---- Person sheet ---- */
@@ -1036,8 +1366,10 @@ function openSettings(){
           <li>Copia la <b>Clave de la API</b> (o el token de lectura) y pégala aquí.</li>
         </ol>
       </details>
-      <h2 class="sec">Nombres</h2>
-      <p class="hint" style="margin-top:0">Los títulos en chino, coreano, japonés o tailandés se cambian solos a español o inglés. Si alguno no tiene traducción, ábrelo y cambia el nombre a mano.</p>
+      <h2 class="sec">Idioma de los títulos</h2>
+      <p class="hint" style="margin-top:0">Cómo quieres ver los títulos en tu lista. Si uno no existe en ese idioma, se usa el siguiente disponible. También puedes elegirlo título a título dentro de su ficha.</p>
+      <div class="seg" style="margin-top:10px">${[['auto','✨ Automático'],['es','🇪🇸 Español'],['en','🇬🇧 Inglés'],['orig','🌏 Original']].map(([k,l]) => `<button class="chip small ${(settings.titleLang||'auto')===k?'on':''}" data-tlang="${k}">${l}</button>`).join('')}</div>
+      <p class="hint">Automático: español si existe; si no, inglés. En anime y manga, el nombre japonés en letras latinas (romaji).</p>
       <button class="btn sec" style="width:100%;margin-top:10px" data-fixnames>🔤 Traducir nombres ahora</button>
       <h2 class="sec">Copia de seguridad</h2>
       <p class="hint" style="margin-top:0">Tu lista (${n} título${n===1?'':'s'}) se guarda en este dispositivo. Haz copias de vez en cuando y guárdalas en Archivos o iCloud.</p>
@@ -1045,7 +1377,7 @@ function openSettings(){
       <h2 class="sec">Datos</h2>
       <p class="hint" style="margin-top:0">Datos de <a href="https://anilist.co" target="_blank" rel="noopener">AniList</a>, <a href="https://www.themoviedb.org" target="_blank" rel="noopener">TMDB</a> y <a href="https://openlibrary.org" target="_blank" rel="noopener">Open Library</a>. Este producto usa la API de TMDB pero no está avalado ni certificado por TMDB.</p>
       <button class="btn del" style="width:100%;margin-top:18px" data-wipe>Borrar toda la lista</button>
-      <p class="hint" style="text-align:center;margin-top:18px">Mi Lista · versión 3 (9 nov)</p>`;
+      <p class="hint" style="text-align:center;margin-top:18px">Mi Lista · versión 5 (9 nov)</p>`;
   };
   draw();
   s.el.addEventListener('click', async e => {
@@ -1059,6 +1391,8 @@ function openSettings(){
       render(); return;
     }
     if(e.target.closest('[data-fixnames]')){ fixNames(true); return; }
+    const tl = e.target.closest('[data-tlang]');
+    if(tl){ settings.titleLang = tl.dataset.tlang; saveSettings(); draw(); applyGlobalTitles(); return; }
     if(e.target.closest('[data-export]')){ exportData(); return; }
     if(e.target.closest('[data-import]')){ $('importFile').click(); return; }
     const w = e.target.closest('[data-wipe]');
@@ -1097,7 +1431,7 @@ $('importFile').addEventListener('change', async e => {
 const VIEW_TXT = {
   lista:['Mi Lista','Manga, anime, dramas, series, libros y películas'],
   prox:['Próximos','Nuevos episodios y estrenos de lo que sigues'],
-  parati:['Para ti','Sugerencias según tus notas'],
+  parati:['Para ti','Sugerencias según tu lista y tus notas'],
   stats:['Estadísticas','Tu resumen de lo que ves y lees']
 };
 function setView(v){
@@ -1119,17 +1453,19 @@ document.addEventListener('click', e => {
     return;
   }
   const act = e.target.closest('[data-act]');
-  if(act){ const a = act.dataset.act; if(a==='settings') openSettings(); else if(a==='refresh') refreshUpcoming(true); else if(a==='resugg'){ sugg.state = 'idle'; buildSuggestions(); } return; }
+  if(act){ const a = act.dataset.act; if(a==='settings') openSettings(); else if(a==='refresh') refreshUpcoming(true); else if(a==='resugg'){ sugg.state = 'idle'; buildSuggestions(); } else if(a==='resugg2'){ sugg2.state = 'idle'; sugg2.sig = perfilSig(); buildProfileSuggestions(); } return; }
   const c = e.target.closest('[data-t]'); if(c){ fType = c.dataset.t; fCountry = 'all'; render(); return; }
   const cc = e.target.closest('[data-c]'); if(cc){ fCountry = cc.dataset.c; render(); return; }
   const s = e.target.closest('[data-s]'); if(s){ fStatus = s.dataset.s; render(); return; }
+  const sm = e.target.closest('[data-smode]'); if(sm){ smode = sm.dataset.smode; renderParati(); return; }
+  const sf2 = e.target.closest('[data-sf2]'); if(sf2){ sugg2.fType = sf2.dataset.sf2; sugg2.userViewed = true; renderParati(); return; }
+  const sa2 = e.target.closest('[data-sugadd2]'); if(sa2){ const x = sugg2.list.find(y => y.entry.id === sa2.dataset.sugadd2); if(x){ addEntry(x.entry, 'pend'); sugg2.userViewed = true; toast('Añadido a Pendientes ✓'); } return; }
+  const sg2 = e.target.closest('[data-sug2]'); if(sg2){ const x = sugg2.list.find(y => y.entry.id === sg2.dataset.sug2); if(x){ sugg2.userViewed = true; openDetail(x.entry); } return; }
   const sf = e.target.closest('[data-sf]'); if(sf){ sugg.fType = sf.dataset.sf; sugg.userViewed = true; renderParati(); return; }
   const p = e.target.closest('[data-plus]');
   if(p){
     const it = items[p.dataset.plus]; if(!it) return;
-    it.prog = (it.prog || 0) + 1;
-    if(it.status === 'pend' || it.status === 'pausa') it.status = 'curso';
-    if(it.total && it.prog >= it.total){ it.prog = it.total; it.status = 'hecho'; it.doneAt = Date.now(); toast('¡Completado! 🎉'); }
+    advance(it, 1);
     saveItem(it); return;
   }
   const sa = e.target.closest('[data-sugadd]');
@@ -1144,6 +1480,25 @@ $('sortSel').addEventListener('change', e => { sortBy = e.target.value; render()
 const h0 = (location.hash || '').slice(1);
 setView(VIEW_TXT[h0] ? h0 : 'lista');
 if(Object.keys(items).length && Date.now() - (settings.lastRefresh||0) > 6*3600*1000) setTimeout(() => refreshUpcoming(false), 1200);
+async function applyGlobalTitles(){
+  const p = settings.titleLang || 'auto';
+  if(p === 'auto'){ toast('Se usará el título automático en los nuevos'); return; }
+  const all = Object.values(items).filter(i => i.titlePref !== 'custom' && !i.titlePref);
+  const need = all.filter(i => !i.titles && (i.src === 'anilist' || (i.src === 'tmdb' && settings.tmdbKey)));
+  if(need.length) toast('Buscando títulos…');
+  const al = need.filter(i => i.src === 'anilist').map(i => i.srcId);
+  for(let k = 0; k < al.length; k += 50){
+    try{ const d = await anilist(`query($ids:[Int]){Page(perPage:50){media(id_in:$ids){id type title{userPreferred romaji english native}}}}`, {ids:al.slice(k, k+50)});
+      d.Page.media.forEach(m => { const it = items[`al:${m.type}:${m.id}`]; if(it) it.titles = {ro:m.title.romaji || m.title.userPreferred, en:m.title.english, orig:m.title.native}; }); }catch(_){}
+  }
+  await runLimited(need.filter(i => i.src === 'tmdb'), 3, async it => {
+    const d = await tmdb(`/${it.mediaType}/${it.srcId}`, {append_to_response:'translations,alternative_titles'});
+    if(items[it.id]) items[it.id].titles = tmdbTitles(d, it.mediaType === 'tv');
+  });
+  let n = 0; all.forEach(it => { if(applyTitlePref(it)) n++; });
+  persist(); render();
+  toast(n ? `${n} título${n>1?'s':''} cambiado${n>1?'s':''}` : 'Títulos al día');
+}
 async function fixNames(manual){
   if(!settings.tmdbKey){ if(manual) toast('Falta la clave de TMDB'); return; }
   const bad = Object.values(items).filter(i => i.src === 'tmdb' && !i.customTitle && !isLatin(i.title));
@@ -1153,6 +1508,7 @@ async function fixNames(manual){
   await runLimited(bad, 3, async it => {
     const d = await tmdb(`/${it.mediaType}/${it.srcId}`, {append_to_response:'translations,alternative_titles'});
     const t = bestTitle(d, it.mediaType === 'tv');
+    if(items[it.id]) items[it.id].titles = tmdbTitles(d, it.mediaType === 'tv');
     if(isLatin(t) && items[it.id]){ items[it.id].orig = items[it.id].orig || items[it.id].title; items[it.id].title = t; n++; }
   });
   if(n){ persist(); render(); }
