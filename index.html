@@ -321,7 +321,9 @@ function bestTitle(d, isTV){ // from a details response with translations append
   if(isLatin(d[f])) return d[f];
   const tr = d.translations?.translations || [];
   const byLang = l => tr.filter(x => x.iso_639_1 === l).map(x => x.data?.[f]).find(isLatin);
-  return byLang('es') || byLang('en') || tr.map(x => x.data?.[f]).find(isLatin) || d[f] || d['original_' + f];
+  const alts = d.alternative_titles?.results || d.alternative_titles?.titles || [];
+  const altBy = cs => alts.filter(a => cs.includes(a.iso_3166_1)).map(a => a.title).find(t => isLatin(t) && /[a-z]/i.test(t));
+  return byLang('es') || byLang('en') || altBy(['ES','MX','US','GB']) || tr.map(x => x.data?.[f]).find(isLatin) || altBy(alts.map(a => a.iso_3166_1)) || d[f] || d['original_' + f];
 }
 function bestOverview(d){
   if(d.overview) return d.overview;
@@ -454,7 +456,7 @@ function normPersonTMDB(p){
 async function loadDetails(e){
   if(e.src === 'tmdb'){
     const isTV = e.mediaType === 'tv';
-    const d = await tmdbL(`/${e.mediaType}/${e.srcId}`, {append_to_response: isTV ? 'aggregate_credits,recommendations,translations' : 'credits,recommendations,release_dates,translations'});
+    const d = await tmdbL(`/${e.mediaType}/${e.srcId}`, {append_to_response: isTV ? 'aggregate_credits,recommendations,translations,alternative_titles' : 'credits,recommendations,release_dates,translations,alternative_titles'});
     let overview = d.overview;
     overview = bestOverview(d);
     const base = normTMDB(d, e.mediaType); base.title = bestTitle(d, isTV);
@@ -662,7 +664,7 @@ async function refreshUpcoming(manual){
     if(settings.tmdbKey){
       const tv = all.filter(i => i.src==='tmdb' && i.status!=='aband' && (i.mediaType==='tv' ? i.mstatus!=='Ended' && i.mstatus!=='Canceled' : (i.status!=='hecho' && (!i.date || i.date >= today))));
       await runLimited(tv, 4, async it => {
-        const d = await tmdb(`/${it.mediaType}/${it.srcId}`, {append_to_response:'translations'});
+        const d = await tmdb(`/${it.mediaType}/${it.srcId}`, {append_to_response:'translations,alternative_titles'});
         const n = normTMDB(d, it.mediaType);
         n.mstatus = d.status; n.title = bestTitle(d, it.mediaType === 'tv');
         if(it.mediaType==='tv'){ n.total = d.number_of_episodes || null; n.seasons = d.number_of_seasons; const ne = d.next_episode_to_air; n.next = ne ? ne.air_date : null; n.nextLabel = ne ? `T${ne.season_number} E${ne.episode_number}` : ''; }
@@ -678,7 +680,7 @@ async function refreshUpcoming(manual){
 function applyMeta(it, n){ // copy fresh public data into a saved item; returns true if changed
   if(!it || !n) return false;
   let ch = false;
-  if(!isLatin(it.title) && isLatin(n.title)){ it.orig = it.orig || it.title; it.title = n.title; ch = true; }
+  if(!it.customTitle && !isLatin(it.title) && isLatin(n.title)){ it.orig = it.orig || it.title; it.title = n.title; ch = true; }
   ['poster','score','total','seasons','mstatus','country','orig','genres'].forEach(k => {
     if(n[k] !== undefined && n[k] !== null && n[k] !== '' && JSON.stringify(n[k]) !== JSON.stringify(it[k])){ it[k] = n[k]; ch = true; }
   });
@@ -933,6 +935,7 @@ function detailHTML(s){
       <div class="rate10">${[1,2,3,4,5,6,7,8,9,10].map(n => `<button class="${it.rating===n?'on':''}" data-rate="${n}">${n}</button>`).join('')}</div>
       <span class="lbl">Próximo estreno ${it.nextLabel ? `· ${esc(it.nextLabel)}` : ''}</span>
       <input class="field" type="date" value="${nextVal}" data-next>
+      <span class="lbl">Nombre en tu lista</span><input class="field" data-ctitle value="${esc(it.title)}">
       <span class="lbl">Notas</span><textarea class="field" data-notes placeholder="Dónde verlo, opinión…">${esc(it.notes||'')}</textarea>
       <button class="btn del" style="width:100%;margin-top:14px" data-del>🗑 Quitar de mi lista</button>
     </div>`;
@@ -976,6 +979,7 @@ function detailChange(s, e){
   const t = e.target, num = v => v === '' ? null : Math.max(0, parseInt(v, 10) || 0);
   if(t.matches('[data-prog]')){ it.prog = num(t.value); if(it.total && it.prog >= it.total && it.status !== 'hecho'){ it.prog = it.total; it.status = 'hecho'; it.doneAt = Date.now(); toast('¡Completado! 🎉'); } saveItem(it); s.draw(); }
   else if(t.matches('[data-total]')){ it.total = num(t.value); saveItem(it); s.draw(); }
+  else if(t.matches('[data-ctitle]')){ const v = t.value.trim(); if(v && v !== it.title){ it.orig = it.orig || it.title; it.title = v; it.customTitle = true; saveItem(it); s.entry.title = v; s.draw(); toast('Nombre cambiado'); } }
   else if(t.matches('[data-season]')){ it.season = num(t.value); saveItem(it); }
   else if(t.matches('[data-next]')){ it.next = t.value || null; it.nextManual = !!t.value; if(!t.value) it.nextLabel = ''; saveItem(it); }
 }
@@ -1032,12 +1036,16 @@ function openSettings(){
           <li>Copia la <b>Clave de la API</b> (o el token de lectura) y pégala aquí.</li>
         </ol>
       </details>
+      <h2 class="sec">Nombres</h2>
+      <p class="hint" style="margin-top:0">Los títulos en chino, coreano, japonés o tailandés se cambian solos a español o inglés. Si alguno no tiene traducción, ábrelo y cambia el nombre a mano.</p>
+      <button class="btn sec" style="width:100%;margin-top:10px" data-fixnames>🔤 Traducir nombres ahora</button>
       <h2 class="sec">Copia de seguridad</h2>
       <p class="hint" style="margin-top:0">Tu lista (${n} título${n===1?'':'s'}) se guarda en este dispositivo. Haz copias de vez en cuando y guárdalas en Archivos o iCloud.</p>
       <div class="btnrow" style="margin-top:10px"><button class="btn sec" data-export>⬇️ Exportar</button><button class="btn sec" data-import>⬆️ Importar</button></div>
       <h2 class="sec">Datos</h2>
       <p class="hint" style="margin-top:0">Datos de <a href="https://anilist.co" target="_blank" rel="noopener">AniList</a>, <a href="https://www.themoviedb.org" target="_blank" rel="noopener">TMDB</a> y <a href="https://openlibrary.org" target="_blank" rel="noopener">Open Library</a>. Este producto usa la API de TMDB pero no está avalado ni certificado por TMDB.</p>
-      <button class="btn del" style="width:100%;margin-top:18px" data-wipe>Borrar toda la lista</button>`;
+      <button class="btn del" style="width:100%;margin-top:18px" data-wipe>Borrar toda la lista</button>
+      <p class="hint" style="text-align:center;margin-top:18px">Mi Lista · versión 3 (9 nov)</p>`;
   };
   draw();
   s.el.addEventListener('click', async e => {
@@ -1050,6 +1058,7 @@ function openSettings(){
       catch(err){ msg.textContent = '❌ ' + (err.message.includes('válida') ? 'La clave no es válida. Revisa que la has copiado entera.' : 'No se pudo comprobar: ' + err.message); }
       render(); return;
     }
+    if(e.target.closest('[data-fixnames]')){ fixNames(true); return; }
     if(e.target.closest('[data-export]')){ exportData(); return; }
     if(e.target.closest('[data-import]')){ $('importFile').click(); return; }
     const w = e.target.closest('[data-wipe]');
@@ -1135,17 +1144,20 @@ $('sortSel').addEventListener('change', e => { sortBy = e.target.value; render()
 const h0 = (location.hash || '').slice(1);
 setView(VIEW_TXT[h0] ? h0 : 'lista');
 if(Object.keys(items).length && Date.now() - (settings.lastRefresh||0) > 6*3600*1000) setTimeout(() => refreshUpcoming(false), 1200);
-async function fixNames(){
-  if(!settings.tmdbKey) return;
-  const bad = Object.values(items).filter(i => i.src === 'tmdb' && !isLatin(i.title));
-  if(!bad.length) return;
+async function fixNames(manual){
+  if(!settings.tmdbKey){ if(manual) toast('Falta la clave de TMDB'); return; }
+  const bad = Object.values(items).filter(i => i.src === 'tmdb' && !i.customTitle && !isLatin(i.title));
+  if(!bad.length){ if(manual) toast('No hay nombres por traducir'); return; }
+  if(manual) toast('Traduciendo nombres…');
   let n = 0;
   await runLimited(bad, 3, async it => {
-    const d = await tmdb(`/${it.mediaType}/${it.srcId}`, {append_to_response:'translations'});
+    const d = await tmdb(`/${it.mediaType}/${it.srcId}`, {append_to_response:'translations,alternative_titles'});
     const t = bestTitle(d, it.mediaType === 'tv');
     if(isLatin(t) && items[it.id]){ items[it.id].orig = items[it.id].orig || items[it.id].title; items[it.id].title = t; n++; }
   });
-  if(n){ persist(); render(); toast(`${n} nombre${n>1?'s':''} traducido${n>1?'s':''}`); }
+  if(n){ persist(); render(); }
+  const left = bad.length - n;
+  if(n || manual) toast(n ? `${n} nombre${n>1?'s':''} traducido${n>1?'s':''}${left?` · ${left} sin traducción`:''}` : 'TMDB no tiene traducción para esos títulos: cámbiales el nombre a mano');
 }
 setTimeout(fixNames, 2500);
 </script>
