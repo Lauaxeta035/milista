@@ -300,6 +300,48 @@ async function anilist(query, variables = {}){
   if(!r.ok || j.errors) throw new Error('AniList ' + (j.errors?.[0]?.message || r.status));
   return j.data;
 }
+/* ---- Latin names for CJK / Thai / Korean titles and people ---- */
+const NONLATIN = /[฀-๿ᄀ-ᇿ぀-ヿ㄰-㆏㐀-䶿一-鿿가-힯豈-﫿]/;
+const isLatin = s => !!s && !NONLATIN.test(s);
+function titleNodes(o){ return [o?.results, o?.cast, o?.combined_credits?.cast, o?.recommendations?.results].filter(Array.isArray).flat().filter(x => x && x.media_type !== 'person' && (x.name || x.title)); }
+async function tmdbL(path, params = {}){ // Spanish, with English names where Spanish is not in Latin letters
+  const es = await tmdb(path, params);
+  const bad = titleNodes(es).filter(x => !isLatin(x.name || x.title));
+  if(bad.length){
+    try{
+      const en = await tmdb(path, params, 'en-US');
+      const m = new Map(titleNodes(en).map(x => [(x.media_type||'') + ':' + x.id, x.name || x.title]));
+      bad.forEach(x => { const v = m.get((x.media_type||'') + ':' + x.id); if(isLatin(v)) x._en = v; });
+    }catch(_){}
+  }
+  return es;
+}
+function bestTitle(d, isTV){ // from a details response with translations appended
+  const f = isTV ? 'name' : 'title';
+  if(isLatin(d[f])) return d[f];
+  const tr = d.translations?.translations || [];
+  const byLang = l => tr.filter(x => x.iso_639_1 === l).map(x => x.data?.[f]).find(isLatin);
+  return byLang('es') || byLang('en') || tr.map(x => x.data?.[f]).find(isLatin) || d[f] || d['original_' + f];
+}
+function bestOverview(d){
+  if(d.overview) return d.overview;
+  const tr = d.translations?.translations || [];
+  return (tr.find(x => x.iso_639_1 === 'es' && x.data?.overview) || tr.find(x => x.iso_639_1 === 'en' && x.data?.overview))?.data.overview || '';
+}
+const PN_KEY = 'milista2_pnames';
+let pnames = lsGet(PN_KEY, {});
+async function personLatin(id){
+  if(id in pnames) return pnames[id];
+  const p = await tmdb(`/person/${id}`, {}, null);
+  const n = isLatin(p.name) ? p.name : ((p.also_known_as || []).find(a => isLatin(a) && /[a-z]/i.test(a)) || '');
+  pnames[id] = n; lsSet(PN_KEY, pnames);
+  return n;
+}
+async function latinizePeople(list){
+  const bad = list.filter(c => c.src === 'tmdb' && !isLatin(c.name)).slice(0, 20);
+  await runLimited(bad, 4, async c => { const n = await personLatin(c.id); if(n){ c.native = c.name; c.name = n; } });
+  return list;
+}
 async function ol(path){
   const r = await fetch('https://openlibrary.org' + path);
   if(!r.ok) throw new Error('Open Library ' + r.status);
@@ -339,7 +381,7 @@ function normTMDB(t, mt){
   return {
     id:`tmdb:${mt}:${t.id}`, src:'tmdb', srcId:t.id, mediaType:mt,
     type: isTV ? classifyTV(t) : 'peli',
-    title: (isTV ? t.name : t.title) || '?', orig: (isTV ? t.original_name : t.original_title) || '',
+    title: [isTV ? t.name : t.title, t._en, isTV ? t.original_name : t.original_title].find(isLatin) || (isTV ? t.name : t.title) || '?', orig: (isTV ? t.original_name : t.original_title) || '',
     year: date ? +date.slice(0,4) : null, date: date || null, country,
     poster: t.poster_path ? TMDB_IMG + 'w342' + t.poster_path : '',
     score: t.vote_count > 2 ? t.vote_average : null,
@@ -378,7 +420,7 @@ async function searchAll(q, kind){
 
   if(kind === 'all'){
     alJob(null);
-    tmdbJob(async () => { const d = await tmdb('/search/multi', {query:q, include_adult:false});
+    tmdbJob(async () => { const d = await tmdbL('/search/multi', {query:q, include_adult:false});
       d.results.forEach(r => { if(r.media_type === 'person') out.people.push(normPersonTMDB(r)); else if(r.media_type==='tv' || r.media_type==='movie'){ if(r.media_type==='tv' && (r.genre_ids||[]).some(g => TV_SKIP_GENRES.includes(g))) return; out.titles.push(normTMDB(r)); } }); });
     jobs.push(ol(`/search.json?q=${encodeURIComponent(q)}&limit=6&fields=key,title,author_name,author_key,first_publish_year,cover_i,number_of_pages_median,ratings_average`)
       .then(d => out.titles.push(...d.docs.map(normOLsearch))).catch(e => out.errors.push(e.message)));
@@ -386,12 +428,12 @@ async function searchAll(q, kind){
   else if(kind === 'manga') alJob('MANGA');
   else if(kind === 'drama' || kind === 'serie'){
     tmdbJob(async () => {
-      const [p1, p2] = await Promise.all([tmdb('/search/tv', {query:q, page:1}), tmdb('/search/tv', {query:q, page:2}).catch(() => ({results:[]}))]);
+      const [p1, p2] = await Promise.all([tmdbL('/search/tv', {query:q, page:1}), tmdbL('/search/tv', {query:q, page:2}).catch(() => ({results:[]}))]);
       let rs = [...p1.results, ...p2.results].map(r => normTMDB(r, 'tv'));
       rs = rs.filter(r => kind === 'drama' ? r.type === 'drama' : r.type !== 'drama');
       out.titles.push(...rs);
     });
-  } else if(kind === 'peli') tmdbJob(async () => { const d = await tmdb('/search/movie', {query:q}); out.titles.push(...d.results.map(r => normTMDB(r, 'movie'))); });
+  } else if(kind === 'peli') tmdbJob(async () => { const d = await tmdbL('/search/movie', {query:q}); out.titles.push(...d.results.map(r => normTMDB(r, 'movie'))); });
   else if(kind === 'libro') jobs.push(ol(`/search.json?q=${encodeURIComponent(q)}&limit=15&fields=key,title,author_name,author_key,first_publish_year,cover_i,number_of_pages_median,ratings_average`).then(d => out.titles.push(...d.docs.map(normOLsearch))).catch(e => out.errors.push(e.message)));
   else if(kind === 'people'){
     tmdbJob(async () => { const d = await tmdb('/search/person', {query:q}); out.people.push(...d.results.map(normPersonTMDB)); });
@@ -405,19 +447,20 @@ async function searchAll(q, kind){
 }
 function normPersonTMDB(p){
   const known = (p.known_for||[]).map(k => k.title || k.name).filter(Boolean).slice(0,2).join(', ');
-  return {src:'tmdb', id:p.id, name:p.name, sub:[p.known_for_department === 'Acting' ? 'Actor/Actriz' : p.known_for_department, known].filter(Boolean).join(' · '), img:p.profile_path ? TMDB_IMG+'w185'+p.profile_path : ''};
+  return {src:'tmdb', id:p.id, name: isLatin(p.name) ? p.name : (pnames[p.id] || p.name), sub:[p.known_for_department === 'Acting' ? 'Actor/Actriz' : p.known_for_department, known].filter(Boolean).join(' · '), img:p.profile_path ? TMDB_IMG+'w185'+p.profile_path : ''};
 }
 
 /* ---- details ---- */
 async function loadDetails(e){
   if(e.src === 'tmdb'){
     const isTV = e.mediaType === 'tv';
-    const d = await tmdb(`/${e.mediaType}/${e.srcId}`, {append_to_response: isTV ? 'aggregate_credits,recommendations' : 'credits,recommendations,release_dates'});
+    const d = await tmdbL(`/${e.mediaType}/${e.srcId}`, {append_to_response: isTV ? 'aggregate_credits,recommendations,translations' : 'credits,recommendations,release_dates,translations'});
     let overview = d.overview;
-    if(!overview){ try{ overview = (await tmdb(`/${e.mediaType}/${e.srcId}`, {}, 'en-US')).overview; }catch(_){} }
-    const base = normTMDB(d, e.mediaType);
+    overview = bestOverview(d);
+    const base = normTMDB(d, e.mediaType); base.title = bestTitle(d, isTV);
     const credits = isTV ? d.aggregate_credits : d.credits;
     const cast = (credits?.cast||[]).slice(0,18).map(c => ({src:'tmdb', id:c.id, name:c.name, role: isTV ? (c.roles?.[0]?.character||'') : (c.character||''), img:c.profile_path ? TMDB_IMG+'w185'+c.profile_path : ''}));
+    try{ await latinizePeople(cast); }catch(_){}
     const meta = {
       ...base, overview, genres:(d.genres||[]).map(g => g.name),
       total: isTV ? (d.number_of_episodes||null) : null, seasons: isTV ? d.number_of_seasons : null,
@@ -469,7 +512,8 @@ async function loadDetails(e){
 /* ---- people ---- */
 async function loadPerson(src, id){
   if(src === 'tmdb'){
-    const p = await tmdb(`/person/${id}`, {append_to_response:'combined_credits'});
+    const p = await tmdbL(`/person/${id}`, {append_to_response:'combined_credits'});
+    if(!isLatin(p.name)){ const lat = (p.also_known_as || []).find(a => isLatin(a) && /[a-z]/i.test(a)); if(lat){ pnames[id] = lat; lsSet(PN_KEY, pnames); p.name = `${lat} (${p.name})`; } }
     let bio = p.biography;
     if(!bio){ try{ bio = (await tmdb(`/person/${id}`, {}, 'en-US')).biography; }catch(_){} }
     const seen = new Map();
@@ -618,9 +662,9 @@ async function refreshUpcoming(manual){
     if(settings.tmdbKey){
       const tv = all.filter(i => i.src==='tmdb' && i.status!=='aband' && (i.mediaType==='tv' ? i.mstatus!=='Ended' && i.mstatus!=='Canceled' : (i.status!=='hecho' && (!i.date || i.date >= today))));
       await runLimited(tv, 4, async it => {
-        const d = await tmdb(`/${it.mediaType}/${it.srcId}`);
+        const d = await tmdb(`/${it.mediaType}/${it.srcId}`, {append_to_response:'translations'});
         const n = normTMDB(d, it.mediaType);
-        n.mstatus = d.status;
+        n.mstatus = d.status; n.title = bestTitle(d, it.mediaType === 'tv');
         if(it.mediaType==='tv'){ n.total = d.number_of_episodes || null; n.seasons = d.number_of_seasons; const ne = d.next_episode_to_air; n.next = ne ? ne.air_date : null; n.nextLabel = ne ? `T${ne.season_number} E${ne.episode_number}` : ''; }
         else { n.next = d.release_date && d.release_date >= today ? d.release_date : null; n.nextLabel = n.next ? 'Estreno' : ''; }
         if(applyMeta(items[it.id], n)) changed++;
@@ -634,6 +678,7 @@ async function refreshUpcoming(manual){
 function applyMeta(it, n){ // copy fresh public data into a saved item; returns true if changed
   if(!it || !n) return false;
   let ch = false;
+  if(!isLatin(it.title) && isLatin(n.title)){ it.orig = it.orig || it.title; it.title = n.title; ch = true; }
   ['poster','score','total','seasons','mstatus','country','orig','genres'].forEach(k => {
     if(n[k] !== undefined && n[k] !== null && n[k] !== '' && JSON.stringify(n[k]) !== JSON.stringify(it[k])){ it[k] = n[k]; ch = true; }
   });
@@ -670,9 +715,9 @@ function renderParati(){
 }
 async function fetchRecs(seed){
   if(seed.src === 'tmdb'){
-    const d = await tmdb(`/${seed.mediaType}/${seed.srcId}/recommendations`);
+    const d = await tmdbL(`/${seed.mediaType}/${seed.srcId}/recommendations`);
     let rs = d.results || [];
-    if(rs.length < 5){ const s2 = await tmdb(`/${seed.mediaType}/${seed.srcId}/similar`).catch(() => ({results:[]})); rs = rs.concat(s2.results||[]); }
+    if(rs.length < 5){ const s2 = await tmdbL(`/${seed.mediaType}/${seed.srcId}/similar`).catch(() => ({results:[]})); rs = rs.concat(s2.results||[]); }
     return rs.filter(r => !(r.genre_ids||[]).some(g => TV_SKIP_GENRES.includes(g))).map(r => normTMDB(r, r.media_type || seed.mediaType));
   }
   if(seed.src === 'anilist'){
@@ -1090,6 +1135,19 @@ $('sortSel').addEventListener('change', e => { sortBy = e.target.value; render()
 const h0 = (location.hash || '').slice(1);
 setView(VIEW_TXT[h0] ? h0 : 'lista');
 if(Object.keys(items).length && Date.now() - (settings.lastRefresh||0) > 6*3600*1000) setTimeout(() => refreshUpcoming(false), 1200);
+async function fixNames(){
+  if(!settings.tmdbKey) return;
+  const bad = Object.values(items).filter(i => i.src === 'tmdb' && !isLatin(i.title));
+  if(!bad.length) return;
+  let n = 0;
+  await runLimited(bad, 3, async it => {
+    const d = await tmdb(`/${it.mediaType}/${it.srcId}`, {append_to_response:'translations'});
+    const t = bestTitle(d, it.mediaType === 'tv');
+    if(isLatin(t) && items[it.id]){ items[it.id].orig = items[it.id].orig || items[it.id].title; items[it.id].title = t; n++; }
+  });
+  if(n){ persist(); render(); toast(`${n} nombre${n>1?'s':''} traducido${n>1?'s':''}`); }
+}
+setTimeout(fixNames, 2500);
 </script>
 </body>
 </html>
